@@ -29,8 +29,7 @@ public class TeleopTest extends LinearOpMode{
         //Driver must press INIT and then ▶️
 
         waitForStart();
-        robot.grabber_rotater.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        
         while (opModeIsActive()) {
             telemetry.addData("TeleOP", "New Code");
             telemetry.update();
@@ -102,57 +101,6 @@ public class TeleopTest extends LinearOpMode{
                 telemetry.addData("Grabber", "Extending");
                 telemetry.update();
                 robot.turnWithAngleAnticlockwise(0.5, 90);
-            }
-
-
-            if (this.gamepad2.right_stick_y > 0.5) {
-                telemetry.addData("Grabber-Rotator", "Moving UP");
-                telemetry.update();
-                robot.grabberRotatorMoveTime(1, 50);
-            }
-
-            if (this.gamepad2.right_stick_y < -0.5) {
-                telemetry.addData("Grabber-Rotator", "Moving Down");
-                telemetry.update();
-                robot.grabberRotatorMoveTime(-1, 50);
-            }
-
-            if (this.gamepad2.left_stick_x > 0.5) {
-                telemetry.addData("Grabber-Slide", "Extending");
-                telemetry.update();
-                robot.grabberSlideMoveTime(1, 50);
-            }
-
-            if (this.gamepad2.left_stick_x < -0.5) {
-                telemetry.addData("Grabber-Slide", "Contracting");
-                telemetry.update();
-                robot.grabberSlideMoveTime(-1, 50);
-            }
-
-            if (this.gamepad2.left_bumper == true) {
-                telemetry.addData("Grabber-Noddles", "Releasing");
-                telemetry.update();
-                robot.releaseMineral(1);
-            }
-
-            if (this.gamepad2.right_bumper == true) {
-                telemetry.addData("Grabber-Noddles", "Grabbing");
-                telemetry.update();
-                robot.grabMineral(1);
-            }
-
-            if (this.gamepad1.dpad_up == true) {
-                telemetry.addData("Latch", "Extending");
-                telemetry.update();
-                robot.latch.setPower(1);
-                sleep(100);
-                robot.latch.setPower(0);
-            } else if (this.gamepad1.dpad_down == true) {
-                telemetry.addData("Latch", "Contracting");
-                telemetry.update();
-                robot.latch.setPower(-1);
-                sleep(100);
-                robot.latch.setPower(0);
             }
 
         };

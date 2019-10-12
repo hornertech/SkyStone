@@ -25,11 +25,6 @@ public class Robot extends java.lang.Thread {
     public DcMotor motor_2;
     public DcMotor motor_3;
 
-    public DcMotor latch;
-    public DcMotor grabber_rotater;
-    public DcMotor grabber_slide;
-    public DcMotor grabber_1;
-
     public ElapsedTime mRuntime;
 
     public boolean isTeleOp = true;
@@ -45,9 +40,9 @@ public class Robot extends java.lang.Thread {
         initDevices();
     }
 
-    public void pause() {
+    public void pause(int milliSec) {
         try {
-            sleep(250);
+            sleep(milliSec);
         } catch (Exception e) {
         }
     }
@@ -80,38 +75,6 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit FUNC: AngleToTick");
 
         return (encoder_ticks);
-    }
-
-    // Come down using encoder moveToPosition and come out of latch
-    public void unlatchUsingEncoderPosition(double power, int direction, double rotattion) {
-        Log.i(TAG, "Enter Function: unlatchUsingEncoderPosition");
-        long time = System.currentTimeMillis();
-
-        // Reset encoder
-        latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Trial and Error
-        int ticks = (int) (rotattion * TICKS_PER_ROTATION);
-
-        // Set the target position and power and run to position
-        latch.setTargetPosition((direction) * ticks);
-        latch.setPower(power);
-        latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-        //Wait for them to reach to the position
-        while (latch.isBusy()) {
-            //Waiting for Robot to travel the distance
-            telemetry.addData("Down", "Moving");
-            telemetry.update();
-        }
-
-        //Reached the distance, so stop the motors
-        latch.setPower(0);
-
-        long time_taken = System.currentTimeMillis() - time;
-        Log.i(TAG, "Time taken for decent : " + time_taken);
-        Log.i(TAG, "Exit Function: unlatchUsingEncoderPosition");
     }
 
     /*****************************************************************************/
@@ -721,166 +684,7 @@ public class Robot extends java.lang.Thread {
         }
     }
 
-    public void moveForwardAndDropSlide(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveForwardAndDropSlide Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = motor_0.getCurrentPosition();
-        long motor1_start_position = motor_1.getCurrentPosition();
-        long motor2_start_position = motor_2.getCurrentPosition();
-        long motor3_start_position = motor_3.getCurrentPosition();
-
-        if (speed == true) {
-            motor_0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            motor_0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-
-        //Set power of all motors
-        motor_0.setPower(power);
-        motor_1.setPower((-1) * power);
-        motor_2.setPower(power);
-        motor_3.setPower((-1) * power);
-        grabber_rotater.setPower(1);
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-
-        //Reached the distance, so stop the motors
-        motor_0.setPower(0);
-        motor_1.setPower(0);
-        motor_2.setPower(0);
-        motor_3.setPower(0);
-        grabber_rotater.setPower(0);
-
-        long motor0_end_position = motor_0.getCurrentPosition();
-        long motor1_end_position = motor_1.getCurrentPosition();
-        long motor2_end_position = motor_2.getCurrentPosition();
-        long motor3_end_position = motor_3.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveForwardForTime");
-        }
-    }
-
-    public void moveRightAndDropSlide(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveRightForTime Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = motor_0.getCurrentPosition();
-        long motor1_start_position = motor_1.getCurrentPosition();
-        long motor2_start_position = motor_2.getCurrentPosition();
-        long motor3_start_position = motor_3.getCurrentPosition();
-
-        if (speed == true) {
-            motor_0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            //Set power of all motors
-            motor_0.setPower((-1) * power);
-            motor_1.setPower((-1) * power);
-            motor_2.setPower(power);
-            motor_3.setPower(power);
-        } else {
-            motor_0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            //Set power of all motors
-            motor_0.setPower((-1) * power);
-            motor_1.setPower((-1) * power);
-            motor_2.setPower(power);
-            motor_3.setPower(power);
-        }
-        grabber_rotater.setPower(1);
-
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-        motor_0.setPower(0);
-        motor_1.setPower(0);
-        motor_2.setPower(0);
-        motor_3.setPower(0);
-        grabber_rotater.setPower(0);
-
-        long motor0_end_position = motor_0.getCurrentPosition();
-        long motor1_end_position = motor_1.getCurrentPosition();
-        long motor2_end_position = motor_2.getCurrentPosition();
-        long motor3_end_position = motor_3.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveRightForTime");
-        }
-    }
-    public void moveBackwardAndExtendSlide(double power,double slide_power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveBackwardForTime Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = motor_0.getCurrentPosition();
-        long motor1_start_position = motor_1.getCurrentPosition();
-        long motor2_start_position = motor_2.getCurrentPosition();
-        long motor3_start_position = motor_3.getCurrentPosition();
-
-        if (speed == true) {
-            motor_0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            motor_0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-
-        //Set power of all motors
-        motor_0.setPower((-1) * power);
-        motor_1.setPower(power);
-        motor_2.setPower((-1) * power);
-        motor_3.setPower(power);
-        grabber_slide.setPower(slide_power);
-
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-
-        //Reached the distance, so stop the motors
-        motor_0.setPower(0);
-        motor_1.setPower(0);
-        motor_2.setPower(0);
-        motor_3.setPower(0);
-        grabber_slide.setPower(0);
-
-        long motor0_end_position = motor_0.getCurrentPosition();
-        long motor1_end_position = motor_1.getCurrentPosition();
-        long motor2_end_position = motor_2.getCurrentPosition();
-        long motor3_end_position = motor_3.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveBackwardForTime");
-        }
-    }
-
-    public void turnForTime(double power, int time, boolean speed, int orientation) {
+     public void turnForTime(double power, int time, boolean speed, int orientation) {
         Log.i(TAG, "Enter Function: turnForTime Power : " + power + " and time : " + time + "Speed : " + speed + "orientation : " + orientation);
 
         if (speed == true) {
@@ -1127,94 +931,7 @@ public class Robot extends java.lang.Thread {
         motor_3.setPower(0);
     }
 
-    public void grabberRotatorMovePosition(double power, int position) {
-        grabber_rotater.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        grabber_rotater.setPower(power);
-        grabber_rotater.setTargetPosition(position);
-        grabber_rotater.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (grabber_rotater.isBusy()) {
-            //Waiting for Robot to travel the distance
-            telemetry.addData("Grabber", "Extending");
-        }
-
-        grabber_rotater.setPower(0);
-    }
-
-    public void grabberRotatorMoveTime(double power, int time) {
-        grabber_rotater.setPower(power);
-
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-
-        grabber_rotater.setPower(0);
-    }
-
-    public void grabberSlideMovePosition(double power, int position) {
-        grabber_slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        grabber_slide.setPower(power);
-        grabber_slide.setTargetPosition(position);
-        grabber_slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (grabber_slide.isBusy()) {
-            telemetry.addData("Grabber", "Extending");
-            telemetry.update();
-        }
-
-        grabber_slide.setPower(0);
-    }
-
-    public void grabberSlideMoveTime(double power, int time) {
-        grabber_slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        grabber_slide.setPower(power);
-
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-
-        grabber_slide.setPower(0);
-    }
-
-
-    public void grabberExtendSlide(double   rotator_power,
-                                   double   slide_power,
-                                   int      rotator_position,
-                                   int      slide_position) {
-        grabberRotatorMovePosition(rotator_power, rotator_position);
-        grabberSlideMovePosition(slide_power, slide_position);
-    }
-
-    public void grabMineral(int time) {
-        grabber_1.setPower(-0.25);
-        try {
-            sleep(time*100);
-        } catch (Exception e) {
-        }
-
-        grabber_1.setPower(0);
-    }
-
-    public void releaseMineral(int time) {
-        grabber_1.setPower(1);
-        try {
-            sleep(time * 100);
-        } catch (Exception e) {
-        }
-        grabber_1.setPower(0);
-    }
-
-    public void pause(long sleep) {
-        try {
-            sleep(sleep);
-        } catch (Exception e) {
-        }
-
-    }
-
-    private void initDeviceCore() throws Exception {
+     private void initDeviceCore() throws Exception {
 
         telemetry.addData("Please wait", "In function init devices");
         telemetry.update();
@@ -1224,15 +941,6 @@ public class Robot extends java.lang.Thread {
         motor_1 = hardwareMap.get(DcMotor.class, "motor_bl");
         motor_2 = hardwareMap.get(DcMotor.class, "motor_fr");
         motor_3 = hardwareMap.get(DcMotor.class, "motor_fl");
-
-
-        //Latch
-        latch = hardwareMap.get(DcMotor.class, "latch");
-
-        grabber_rotater = hardwareMap.get(DcMotor.class, "grabber_rotater");
-        grabber_slide = hardwareMap.get(DcMotor.class, "grabber_slide");
-
-        grabber_1 = hardwareMap.get(DcMotor.class, "grabber_1");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
