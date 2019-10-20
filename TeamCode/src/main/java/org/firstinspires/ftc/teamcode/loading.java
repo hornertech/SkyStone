@@ -212,5 +212,5 @@ public class loading extends LinearOpMode {
 
         // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
-    
+
 }
