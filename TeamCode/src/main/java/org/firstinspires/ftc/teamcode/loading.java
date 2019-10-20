@@ -215,5 +215,5 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
 
         // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
-    
+
 }
