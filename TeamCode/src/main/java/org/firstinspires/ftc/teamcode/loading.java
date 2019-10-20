@@ -188,8 +188,9 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
 
         targetsSkyStone.activate();
 
+        Robot.moveForwardForTime(0.5, 300, false);
         while (!isStopRequested()) {
-            Robot.moveForwardToPosition(1, 10);
+
             detectOnce(allTrackables);
         }
 

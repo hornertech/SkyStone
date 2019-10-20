@@ -1033,6 +1033,9 @@ public class Robot extends java.lang.Thread {
         Motor_BR = hardwareMap.get(DcMotor.class, "motor_fr");
         Motor_BL = hardwareMap.get(DcMotor.class, "motor_fl");
 
+        Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
+        Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
