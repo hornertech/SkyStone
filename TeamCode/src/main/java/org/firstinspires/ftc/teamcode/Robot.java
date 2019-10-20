@@ -25,6 +25,9 @@ public class Robot extends java.lang.Thread {
     public DcMotor Motor_BR;
     public DcMotor Motor_BL;
 
+    public DcMotor Slide_L;
+    public DcMotor Slide_R;
+
     public ElapsedTime mRuntime;
 
     public boolean isTeleOp = true;
@@ -931,6 +934,94 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setPower(0);
     }
 
+    public void moveSlideUp(double power, double rotation)
+    {
+        // Reset all encoders
+        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //Find the motor ticks needed to travel the required distance
+        int ticks = (int) (rotation * TICKS_PER_ROTATION);
+
+        // Set the target position for all motors (in ticks)
+        Slide_R.setTargetPosition(ticks);
+        Slide_L.setTargetPosition((-1) * ticks);
+
+
+        //Set power of all motors
+        Slide_R.setPower(power);
+        Slide_L.setPower(power);
+
+        //Set Motors to RUN_TO_POSITION
+        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Wait for them to reach to the position
+        // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
+        while (Slide_R.isBusy()) {
+            //Waiting for Robot to travel the distance
+            telemetry.addData("Slide", "UP");
+            telemetry.update();
+        }
+
+
+        //Reached the distance, so stop the motors
+        Slide_R.setPower(0);
+        Slide_L.setPower(0);
+
+
+        if (DEBUG_INFO) {
+            Log.i(TAG, "TICKS needed : " + ticks);
+            Log.i(TAG, "Actual Ticks Motor0 : " + Slide_R.getCurrentPosition());
+            Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
+            Log.i(TAG, "Exit Function: moveSlideUp");
+        }
+    }
+
+    public void moveSlideDown(double power, double rotation)
+    {
+        // Reset all encoders
+        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //Find the motor ticks needed to travel the required distance
+        int ticks = (int) (rotation * TICKS_PER_ROTATION);
+
+        // Set the target position for all motors (in ticks)
+        Slide_R.setTargetPosition((-1) * ticks);
+        Slide_L.setTargetPosition(ticks);
+
+
+        //Set power of all motors
+        Slide_R.setPower(power);
+        Slide_L.setPower(power);
+
+        //Set Motors to RUN_TO_POSITION
+        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Wait for them to reach to the position
+        // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
+        while (Slide_R.isBusy()) {
+            //Waiting for Robot to travel the distance
+            telemetry.addData("Slide", "Down");
+            telemetry.update();
+        }
+
+
+        //Reached the distance, so stop the motors
+        Slide_R.setPower(0);
+        Slide_L.setPower(0);
+
+
+        if (DEBUG_INFO) {
+            Log.i(TAG, "TICKS needed : " + ticks);
+            Log.i(TAG, "Actual Ticks Motor0 : " + Slide_R.getCurrentPosition());
+            Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
+            Log.i(TAG, "Exit Function: moveSlideDown");
+        }
+    }
+
      private void initDeviceCore() throws Exception {
 
         telemetry.addData("Please wait", "In function init devices");
@@ -947,6 +1038,7 @@ public class Robot extends java.lang.Thread {
 
 
     }
+
 
     private void initDevices() {
         mRuntime = new ElapsedTime();

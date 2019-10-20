@@ -70,9 +70,12 @@ public class TeleopTest extends LinearOpMode{
             }
 
             if (this.gamepad1.x == true) {
-                telemetry.addData("Robot-Testing ", "Moving Left");
+                /*telemetry.addData("Robot-Testing ", "Moving Left");
                 telemetry.update();
-                robot.moveLeftForTime(0.3, 2000, true);
+                robot.moveLeftForTime(0.3, 2000, true); */
+                telemetry.addData("Robot-Testing ", "Slide-up");
+                telemetry.update();
+                robot.moveSlideUp(0.2, 0.2);
             }
 
             if (this.gamepad1.b == true) {
@@ -81,9 +84,12 @@ public class TeleopTest extends LinearOpMode{
                 robot.moveRightForTime(0.3, 2000, true);
             }
             if (this.gamepad1.y == true) {
-                telemetry.addData("Robot-Testing ", "Moving Forward");
+              /*  telemetry.addData("Robot-Testing ", "Moving Forward");
                 telemetry.update();
-                robot.moveForwardForTime(1, 1000, true);
+                robot.moveForwardForTime(1, 1000, true);*/
+                telemetry.addData("Robot-Testing ", "Slide-Down");
+                telemetry.update();
+                robot.moveSlideDown(0.2, 0.2);
             }
             if (this.gamepad1.a == true) {
                 telemetry.addData("Robot-Testing ", "Moving Backward");
