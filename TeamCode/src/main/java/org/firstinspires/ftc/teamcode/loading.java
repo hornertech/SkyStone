@@ -36,15 +36,6 @@ public class loading extends LinearOpMode {
 
     DigitalChannel digitalTouch;  // Hardware Device Object
     //---------------------------------------------------------------------------------------
-    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
-    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
-    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
-    private static final int GOLD_MINERAL_FOUND = 0;
-    private static final int SILVER_MINERAL_FOUND = 1;
-    private static final int NO_MINERAL_FOUND = 2;
-    public boolean debugOn = false;
-    public boolean test = false;
-    public boolean sensortouch = true;
 
     public String TAG = "SKYSTONE";
     //---------------------------------------------------------------------------------------
@@ -74,8 +65,56 @@ public class loading extends LinearOpMode {
     private float phoneYRotate    = 0;
     private float phoneZRotate    = 0;
 
+    double location[] = {0, 0, 0, 0, 0, 0, 0};
 
+void detectOnce(List<VuforiaTrackable> allTrackables)
+{
+    // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
+    targetVisible = false;
+    location[0] = 0;
+    for (VuforiaTrackable trackable : allTrackables) {
+        if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+            telemetry.addData("Visible Target", trackable.getName());
+            targetVisible = true;
 
+            // getUpdatedRobotLocation() will return null if no new information is available since
+            // the last time that call was made, or if the trackable is not currently visible.
+            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+            if (robotLocationTransform != null) {
+                lastLocation = robotLocationTransform;
+            }
+            break;
+        }
+    }
+
+    //I just kept the following as part of the code, but I don't think we need it (-VJ)
+    // Provide feedback as to where the robot is located (if we know).
+    if (targetVisible) {
+        // express position (translation) of robot in inches.
+        VectorF translation = lastLocation.getTranslation();
+        location[0] = 1;
+        telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+        location[1] = translation.get(0) / mmPerInch;
+        location[2] = translation.get(1) / mmPerInch;
+        location[3] = translation.get(2) / mmPerInch;
+                // express the rotation of the robot in degrees.
+        Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+
+        location[4] = rotation.firstAngle;
+        location[5] = rotation.secondAngle;
+        location[6] = rotation.thirdAngle;
+
+        Log.i(TAG, "Positions: X =" + location[1] + " Y = " + location[2] + " Z = " + location[3]);
+        Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
+    }
+    else {
+        telemetry.addData("Visible Target", "none");
+    }
+    telemetry.update();
+}
 
 
     //The Autonomous Program
@@ -139,7 +178,7 @@ public class loading extends LinearOpMode {
 
 
 
-        //org.firstinspires.ftc.teamcode.Robot robot = new org.firstinspires.ftc.teamcode.Robot(hardwareMap, telemetry);
+        org.firstinspires.ftc.teamcode.Robot Robot = new org.firstinspires.ftc.teamcode.Robot(hardwareMap, telemetry);
 
 
         telemetry.addData(">", "Press Play to start tracking");
@@ -149,41 +188,10 @@ public class loading extends LinearOpMode {
 
         targetsSkyStone.activate();
 
+        Robot.moveForwardForTime(0.5, 300, false);
         while (!isStopRequested()) {
 
-            // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
-            targetVisible = false;
-            for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-                    telemetry.addData("Visible Target", trackable.getName());
-                    targetVisible = true;
-
-                    // getUpdatedRobotLocation() will return null if no new information is available since
-                    // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
-                    }
-                    break;
-                }
-            }
-
-            //I just kept the following as part of the code, but I don't think we need it (-VJ)
-            // Provide feedback as to where the robot is located (if we know).
-            if (targetVisible) {
-                // express position (translation) of robot in inches.
-                VectorF translation = lastLocation.getTranslation();
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                // express the rotation of the robot in degrees.
-                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-            else {
-                telemetry.addData("Visible Target", "none");
-            }
-            telemetry.update();
+            detectOnce(allTrackables);
         }
 
         targetsSkyStone.deactivate();
@@ -212,5 +220,5 @@ public class loading extends LinearOpMode {
 
         // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
-    
+
 }
