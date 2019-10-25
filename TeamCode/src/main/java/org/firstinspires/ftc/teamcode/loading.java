@@ -122,6 +122,7 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
 
 
         int detect_result;
+        int i;
        // initVuforia();
 
         //Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -188,10 +189,17 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
 
         targetsSkyStone.activate();
 
+        Robot.moveSlideUp(0.2, 0.5);
+        Robot.dropStone();
         Robot.moveForwardForTime(0.5, 300, false);
         while (!isStopRequested()) {
-
-            detectOnce(allTrackables);
+            for (i = 0; i < 6; i++) {
+                detectOnce(allTrackables);
+                if (location[0] == 1) {
+                    // Detected Stone
+                    // Move to Stone
+                }
+            }
         }
 
         targetsSkyStone.deactivate();

@@ -28,6 +28,8 @@ public class Robot extends java.lang.Thread {
     public DcMotor Slide_L;
     public DcMotor Slide_R;
 
+    public CRServo pincher;
+
     public ElapsedTime mRuntime;
 
     public boolean isTeleOp = true;
@@ -1022,7 +1024,23 @@ public class Robot extends java.lang.Thread {
         }
     }
 
-     private void initDeviceCore() throws Exception {
+    public void grabStone() {
+        pincher.setPower(1);
+        try {
+            sleep(400);
+            pincher.setPower(0);
+        } catch (Exception e){}
+    }
+
+    public void dropStone() {
+        pincher.setPower(-1);
+        try {
+            sleep(400);
+            pincher.setPower(0);
+        } catch (Exception e){}
+    }
+
+    private void initDeviceCore() throws Exception {
 
         telemetry.addData("Please wait", "In function init devices");
         telemetry.update();
@@ -1035,6 +1053,8 @@ public class Robot extends java.lang.Thread {
 
         Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
         Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
+
+        pincher = hardwareMap.get(CRServo.class, "pincher");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
