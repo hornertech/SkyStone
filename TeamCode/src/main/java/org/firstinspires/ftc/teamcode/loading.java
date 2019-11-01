@@ -65,58 +65,74 @@ public class loading extends LinearOpMode {
     private float phoneYRotate    = 0;
     private float phoneZRotate    = 0;
 
-    double location[] = {0, 0, 0, 0, 0, 0, 0};
+    private double location[] = {0, 0, 0, 0, 0, 0, 0};
+    private int boardDistance = 30;
+    private int bridgeOffset = 10;
+    private int skystonePicked = 0;
+    private int skystoneLocation = 0;
+    private int stoneStrafeTime = 200;
+    private int stoneForwardTime = 150;
 
-void detectOnce(List<VuforiaTrackable> allTrackables)
-{
-    // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
-    targetVisible = false;
-    location[0] = 0;
-    for (VuforiaTrackable trackable : allTrackables) {
-        if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-            telemetry.addData("Visible Target", trackable.getName());
-            targetVisible = true;
+    void detectOnce(List<VuforiaTrackable> allTrackables) {
+        // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
+        targetVisible = false;
+        location[0] = 0;
+        for (VuforiaTrackable trackable : allTrackables) {
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+                telemetry.addData("Visible Target", trackable.getName());
+                targetVisible = true;
 
-            // getUpdatedRobotLocation() will return null if no new information is available since
-            // the last time that call was made, or if the trackable is not currently visible.
-            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-            if (robotLocationTransform != null) {
-                lastLocation = robotLocationTransform;
+                // getUpdatedRobotLocation() will return null if no new information is available since
+                // the last time that call was made, or if the trackable is not currently visible.
+                OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+                if (robotLocationTransform != null) {
+                    lastLocation = robotLocationTransform;
+                }
+                break;
             }
-            break;
         }
+
+        //I just kept the following as part of the code, but I don't think we need it (-VJ)
+        // Provide feedback as to where the robot is located (if we know).
+        if (targetVisible) {
+            // express position (translation) of robot in inches.
+            VectorF translation = lastLocation.getTranslation();
+            location[0] = 1;
+            telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                    translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+            location[1] = translation.get(0) / mmPerInch;
+            location[2] = translation.get(1) / mmPerInch;
+            location[3] = translation.get(2) / mmPerInch;
+            // express the rotation of the robot in degrees.
+            Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+            telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+
+            location[4] = rotation.firstAngle;
+            location[5] = rotation.secondAngle;
+            location[6] = rotation.thirdAngle;
+
+            Log.i(TAG, "Positions: X =" + location[1] + " Y = " + location[2] + " Z = " + location[3]);
+            Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
+        } else {
+            telemetry.addData("Visible Target", "none");
+        }
+        telemetry.update();
     }
 
-    //I just kept the following as part of the code, but I don't think we need it (-VJ)
-    // Provide feedback as to where the robot is located (if we know).
-    if (targetVisible) {
-        // express position (translation) of robot in inches.
-        VectorF translation = lastLocation.getTranslation();
-        location[0] = 1;
-        telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
-        location[1] = translation.get(0) / mmPerInch;
-        location[2] = translation.get(1) / mmPerInch;
-        location[3] = translation.get(2) / mmPerInch;
-                // express the rotation of the robot in degrees.
-        Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+    public void moveToSkyStone(org.firstinspires.ftc.teamcode.Robot robot) {
+        if (location[1] > 0)
+        {
+            robot.moveRightToPosition(0.5, (int) location[1]);
+        }
+        else
+        {
+            robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) location[1]));
+        }
 
-        location[4] = rotation.firstAngle;
-        location[5] = rotation.secondAngle;
-        location[6] = rotation.thirdAngle;
-
-        Log.i(TAG, "Positions: X =" + location[1] + " Y = " + location[2] + " Z = " + location[3]);
-        Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
+        robot.moveForwardToPosition(0.5, java.lang.Math.abs((int) location[2]));
     }
-    else {
-        telemetry.addData("Visible Target", "none");
-    }
-    telemetry.update();
-}
-
-
     //The Autonomous Program
     public void runOpMode() {
 
@@ -174,13 +190,7 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
         }
 
-
-
-
-
-
         org.firstinspires.ftc.teamcode.Robot Robot = new org.firstinspires.ftc.teamcode.Robot(hardwareMap, telemetry);
-
 
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
@@ -193,13 +203,37 @@ void detectOnce(List<VuforiaTrackable> allTrackables)
         Robot.dropStone();
         Robot.moveForwardForTime(0.5, 300, false);
         while (!isStopRequested()) {
-            for (i = 0; i < 6; i++) {
-                detectOnce(allTrackables);
-                if (location[0] == 1) {
-                    // Detected Stone
-                    // Move to Stone
+                for (i = skystoneLocation; i < 6; i++) {
+                    detectOnce(allTrackables);
+                    if (location[0] == 1) {
+                        // Assuming it's already infront
+                        skystoneLocation = i;
+                        skystonePicked++;
+                        Robot.moveForwardForTime(0.5, 300, false); // get close enough to pick
+                        Robot.grabStone();
+                        Robot.moveBackwardForTime(0.5, 300, false); // move little back
+                        // Go to Building zone
+                        Robot.slowTurn(90);
+                        Robot.moveForwardForTime(0.5, 2000 + (skystoneLocation*stoneForwardTime), false);
+                        Robot.dropStone();
+                        if (skystonePicked == 2)
+                        {
+                            //Park
+                            skystoneLocation = 6;
+                            break;
+                        }
+                        else {
+                            // goto detect new stone
+                            Robot.moveBackwardForTime(0.5, 2000 + ((skystoneLocation + 1) * stoneForwardTime) , false);
+                            Robot.slowTurn(-90);
+                        }
+
+                    }
+                    else
+                    {
+                        Robot.moveRightForTime(0.5,stoneStrafeTime, false );
+                    }
                 }
-            }
         }
 
         targetsSkyStone.deactivate();

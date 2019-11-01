@@ -877,7 +877,7 @@ public class Robot extends java.lang.Thread {
         if (isTeleOp == false) pause(250);
     }
 
-    public void slow_turn(long angle) {
+    public void slowTurn(long angle) {
         Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -1030,6 +1030,7 @@ public class Robot extends java.lang.Thread {
             sleep(400);
             pincher.setPower(0);
         } catch (Exception e){}
+        pincher.setPower(0);
     }
 
     public void dropStone() {
@@ -1038,6 +1039,7 @@ public class Robot extends java.lang.Thread {
             sleep(400);
             pincher.setPower(0);
         } catch (Exception e){}
+        pincher.setPower(0);
     }
 
     private void initDeviceCore() throws Exception {
