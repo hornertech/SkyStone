@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Gyroscope;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,7 +19,7 @@ public class Robot extends java.lang.Thread {
 
     private static final int TICKS_PER_ROTATION = 1440; //Tetrix motor specific
     private static final int WHEEL_DIAMETER = 6; //Wheel diameter in inches
-    public String TAG = "FTC_APP";
+    public String TAG = "FTC";
 
     public DcMotor Motor_FL;
     public DcMotor Motor_FR;
@@ -28,7 +29,10 @@ public class Robot extends java.lang.Thread {
     public DcMotor Slide_L;
     public DcMotor Slide_R;
 
-    public CRServo pincher;
+    public DcMotor Clamp_L;
+    public DcMotor Clamp_R;
+
+    public Servo pincher;
 
     public ElapsedTime mRuntime;
 
@@ -37,7 +41,7 @@ public class Robot extends java.lang.Thread {
     public boolean DEBUG_INFO = false;
 
     public long movementFactor = 1;
-    public long turnFactor = 1;
+    public double turnFactor = 7.2;
 
     Robot(HardwareMap map, Telemetry tel) {
         hardwareMap = map;
@@ -525,8 +529,9 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
             Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
             Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveForwardForTime");
+
         }
+        Log.i(TAG, "Exit Function: moveForwardForTime");
     }
 
     public void moveBackwardForTime(double power, int time, boolean speed) {
@@ -576,8 +581,9 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
             Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
             Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveBackwardForTime");
+
         }
+        Log.i(TAG, "Exit Function: moveBackwardForTime");
     }
 
     public void moveRightForTime(double power, int time, boolean speed) {
@@ -629,8 +635,9 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
             Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
             Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-            Log.i(TAG, "Exit Function: moveRightForTime");
+
         }
+        Log.i(TAG, "Exit Function: moveRightForTime");
     }
 
     public void moveLeftForTime(double power, int time, boolean speed) {
@@ -685,8 +692,8 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
             Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
 
-            Log.i(TAG, "Exit Function: moveLeftForTime");
         }
+        Log.i(TAG, "Exit Function: moveLeftForTime");
     }
 
      public void turnForTime(double power, int time, boolean speed, int orientation) {
@@ -876,8 +883,29 @@ public class Robot extends java.lang.Thread {
         telemetry.update();
         if (isTeleOp == false) pause(250);
     }
+    public void ClampDown(int time){
+        Clamp_L.setPower(0.4);
+        Clamp_R.setPower(-0.4);
+        try {
+            sleep(time);
+        } catch (Exception e) {
+        }
+        Clamp_L.setPower(0);
+        Clamp_R.setPower(0);
+    }
+    public void ClampUp(int time){
+        Clamp_L.setPower(-0.4);
+        Clamp_R.setPower(0.4);
+        try {
+            sleep(time);
+        } catch (Exception e) {
+        }
+        Clamp_L.setPower(0);
+        Clamp_R.setPower(0);
+    }
+    public void slowTurn(double angle) {
+        Log.i(TAG, "Enter Function slowTurn Angle: "+ angle);
 
-    public void slowTurn(long angle) {
         Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -888,7 +916,7 @@ public class Robot extends java.lang.Thread {
             Motor_BR.setPower(0.5);
             Motor_BL.setPower(0.5);
             try {
-                sleep(angle * turnFactor);
+                sleep((int)(angle * turnFactor));
             } catch (Exception e) {
             }
             Motor_FL.setPower(0);
@@ -903,7 +931,7 @@ public class Robot extends java.lang.Thread {
             Motor_BR.setPower(-0.5);
             Motor_BL.setPower(-0.5);
             try {
-                sleep(-1 * angle * turnFactor);
+                sleep((int)(-1 * angle * turnFactor));
             } catch (Exception e) {
             }
             Motor_FL.setPower(0);
@@ -913,6 +941,7 @@ public class Robot extends java.lang.Thread {
             if (isTeleOp == false) pause(250);
             if (isTeleOp == false) pause(250);
         }
+        Log.i(TAG, "Exit Function slowTurn");
     }
 
     //CLEANUP: remove this and use moveLeft/RightForTime
@@ -938,6 +967,7 @@ public class Robot extends java.lang.Thread {
 
     public void moveSlideUp(double power, double rotation)
     {
+        Log.i(TAG, "Enter Function moveSlideUp Power: "+ power + " Rotation :" + rotation);
         // Reset all encoders
         Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -946,8 +976,8 @@ public class Robot extends java.lang.Thread {
         int ticks = (int) (rotation * TICKS_PER_ROTATION);
 
         // Set the target position for all motors (in ticks)
-        Slide_R.setTargetPosition(ticks);
-        Slide_L.setTargetPosition((-1) * ticks);
+        Slide_L.setTargetPosition(ticks);
+        Slide_R.setTargetPosition((-1) * ticks);
 
 
         //Set power of all motors
@@ -978,10 +1008,12 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
             Log.i(TAG, "Exit Function: moveSlideUp");
         }
+        Log.i(TAG, "Exit Function moveSlideUp ");
     }
 
     public void moveSlideDown(double power, double rotation)
     {
+        Log.i(TAG, "Enter Function moveSlideDown Power: "+ power + " Rotation :" + rotation);
         // Reset all encoders
         Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -990,8 +1022,8 @@ public class Robot extends java.lang.Thread {
         int ticks = (int) (rotation * TICKS_PER_ROTATION);
 
         // Set the target position for all motors (in ticks)
-        Slide_R.setTargetPosition((-1) * ticks);
-        Slide_L.setTargetPosition(ticks);
+        Slide_L.setTargetPosition((-1) * ticks);
+        Slide_R.setTargetPosition(ticks);
 
 
         //Set power of all motors
@@ -1022,24 +1054,25 @@ public class Robot extends java.lang.Thread {
             Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
             Log.i(TAG, "Exit Function: moveSlideDown");
         }
+        Log.i(TAG, "Exit Function moveSlideDown ");
     }
 
     public void grabStone() {
-        pincher.setPower(1);
-        try {
-            sleep(400);
-            pincher.setPower(0);
-        } catch (Exception e){}
-        pincher.setPower(0);
+        Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
+        pincher.setPosition(0.72);
+        Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
     public void dropStone() {
-        pincher.setPower(-1);
-        try {
-            sleep(400);
-            pincher.setPower(0);
-        } catch (Exception e){}
-        pincher.setPower(0);
+        Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
+        pincher.setPosition(0.84);
+        Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
+     }
+
+    public void setPosition(double position) {
+        Log.i(TAG, "Enter Function setPosition Start Position:" + pincher.getPosition());
+       pincher.setPosition(position);
+        Log.i(TAG, "Exit Function setPosition End Position:" + pincher.getPosition());
     }
 
     private void initDeviceCore() throws Exception {
@@ -1056,7 +1089,10 @@ public class Robot extends java.lang.Thread {
         Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
         Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
 
-        pincher = hardwareMap.get(CRServo.class, "pincher");
+        Clamp_L = hardwareMap.get(DcMotor.class, "clamp_l");
+        Clamp_R = hardwareMap.get(DcMotor.class, "clamp_r");
+
+        pincher = hardwareMap.get(Servo.class, "pincher");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

@@ -37,7 +37,7 @@ public class loading extends LinearOpMode {
     DigitalChannel digitalTouch;  // Hardware Device Object
     //---------------------------------------------------------------------------------------
 
-    public String TAG = "SKYSTONE";
+    public String TAG = "FTC";
     //---------------------------------------------------------------------------------------
 
     private static final String VUFORIA_KEY = "AV8zEej/////AAABmVo2vNWmMUkDlkTs5x1GOThRP0cGar67mBpbcCIIz/YtoOvVynNRmJv/0f9Jhr9zYd+f6FtI0tYHqag2teC5GXiKrNM/Jl7FNyNGCvO9zVIrblYF7genK1FVH3X6/kQUrs0vnzd89M0uSAljx0mAcgMEEUiNOUHh2Fd7IOgjlnh9FiB+cJ8bu/3WeKDxnDdqx6JI5BlQ4w7YW+3X2icSRDRlvE4hhuW1VM1BTPQgds7OtHKqUn4Z5w1Wqg/dWiOHxYTww28PVeg3ae4c2l8FUtE65jr2qQdQNc+DMLDgnJ0fUi9Ww28OK/aNrQQnHU97TnUgjLgCTlV7RXpfut5mZWXbWvO6wA6GGkm3fAIQ2IPL";
@@ -66,15 +66,21 @@ public class loading extends LinearOpMode {
     private float phoneZRotate    = 0;
 
     private double location[] = {0, 0, 0, 0, 0, 0, 0};
+    // Location[0] : 0 = Target not visible, 1 = Target visible
+    // Location[1] : Lateral drift from target
+    // Location[2] : Distance from Target
+    // Location[3] : Vertical shift, not needed for our program
+    // Location[4]
     private int boardDistance = 30;
     private int bridgeOffset = 10;
     private int skystonePicked = 0;
     private int skystoneLocation = 0;
-    private int stoneStrafeTime = 200;
+    private int stoneStrafeTime = 620;
     private int stoneForwardTime = 150;
 
     void detectOnce(List<VuforiaTrackable> allTrackables) {
         // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
+        Log.i(TAG, "Entering Function detectOnce");
         targetVisible = false;
         location[0] = 0;
         for (VuforiaTrackable trackable : allTrackables) {
@@ -116,22 +122,27 @@ public class loading extends LinearOpMode {
             Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
         } else {
             telemetry.addData("Visible Target", "none");
+            Log.i(TAG, "No Target Visible");
         }
         telemetry.update();
     }
 
 
     public void moveToSkyStone(org.firstinspires.ftc.teamcode.Robot robot) {
-        if (location[1] > 0)
-        {
-            robot.moveRightToPosition(0.5, (int) location[1]);
+
+        if (java.lang.Math.abs(location[6]) > 0){
+            robot.slowTurn((int)location[6] * (-1));
         }
-        else
+        if (location[2] > 5)
         {
-            robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) location[1]));
+            robot.moveRightToPosition(0.5, (int) location[2]);
+        }
+        else if (location[2] > 5)
+        {
+            robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) location[2]));
         }
 
-        robot.moveForwardToPosition(0.5, java.lang.Math.abs((int) location[2]));
+        robot.moveForwardToPosition(0.3, (java.lang.Math.abs((int) location[1]) - 4));
     }
     //The Autonomous Program
     public void runOpMode() {
@@ -162,8 +173,8 @@ public class loading extends LinearOpMode {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
 
         // Next, translate the camera lens to where it is on the robot.
-        final float CAMERA_FORWARD_DISPLACEMENT  = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
+        final float CAMERA_FORWARD_DISPLACEMENT  = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
+        final float CAMERA_VERTICAL_DISPLACEMENT = 5.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
@@ -199,23 +210,47 @@ public class loading extends LinearOpMode {
 
         targetsSkyStone.activate();
 
-        Robot.moveSlideUp(0.2, 0.5);
+        Robot.moveForwardForTime(1, 300, false);
         Robot.dropStone();
-        Robot.moveForwardForTime(0.5, 300, false);
-        while (!isStopRequested()) {
+        Robot.moveSlideUp(1, 2);
+        /*
+        for (int j = 0; j < 2; j++ ) {
+            detectOnce(allTrackables);
+            sleep(100);
+        }
+        moveToSkyStone(Robot);
+        Robot.grabStone();
+        Robot.moveSlideDown(1, 1.7);
+        sleep(1000);
+        Robot.moveBackwardForTime(0.5, 100, false); // move little back
+        Robot.slowTurn(90);
+        Robot.moveForwardForTime(1, 1200, false);
+        Robot.dropStone();
+        Robot.moveSlideUp(1, 1.5);
+        Robot.moveBackwardForTime(1, 200, false);
+        Robot.moveSlideDown(1, 1.5);
+        Robot.moveBackwardForTime(1, 1000, false);
+        */
+
+      //  while (!isStopRequested()) {
                 for (i = skystoneLocation; i < 6; i++) {
-                    detectOnce(allTrackables);
-                    if (location[0] == 1) {
+                        sleep(500);
+                      detectOnce(allTrackables);
+                   if (location[0] == 1) {
                         // Assuming it's already infront
                         skystoneLocation = i;
                         skystonePicked++;
-                        Robot.moveForwardForTime(0.5, 300, false); // get close enough to pick
-                        Robot.grabStone();
-                        Robot.moveBackwardForTime(0.5, 300, false); // move little back
-                        // Go to Building zone
-                        Robot.slowTurn(90);
-                        Robot.moveForwardForTime(0.5, 2000 + (skystoneLocation*stoneForwardTime), false);
-                        Robot.dropStone();
+                       moveToSkyStone(Robot);
+                       Robot.grabStone();
+                       Robot.moveSlideDown(1, 2);
+                       sleep(1000);
+                       Robot.moveBackwardForTime(0.5, 200, false); // move little back
+                       Robot.slowTurn(90);
+                       Robot.moveForwardForTime(1, 1200 + ((skystoneLocation + 1) * stoneForwardTime), false);
+                       Robot.dropStone();
+                       Robot.moveSlideUp(1, 2);
+                       Robot.moveBackwardForTime(1, 150, false);
+                       Robot.moveSlideDown(1, 2);
                         if (skystonePicked == 2)
                         {
                             //Park
@@ -224,8 +259,11 @@ public class loading extends LinearOpMode {
                         }
                         else {
                             // goto detect new stone
-                            Robot.moveBackwardForTime(0.5, 2000 + ((skystoneLocation + 1) * stoneForwardTime) , false);
+                            Robot.moveBackwardForTime(1, 1000 + ((skystoneLocation + 1) * stoneForwardTime) , false);
+                            Robot.moveSlideUp(1, 1.6);
                             Robot.slowTurn(-90);
+                            Robot.moveBackwardForTime(1, 150 , false);
+
                         }
 
                     }
@@ -234,9 +272,9 @@ public class loading extends LinearOpMode {
                         Robot.moveRightForTime(0.5,stoneStrafeTime, false );
                     }
                 }
-        }
+       // }
 
-        targetsSkyStone.deactivate();
+       targetsSkyStone.deactivate();
 
     }
 

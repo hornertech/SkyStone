@@ -71,43 +71,54 @@ public class TeleopTest extends LinearOpMode{
 
             if (this.gamepad1.x == true) {
 
-                telemetry.addData("Robot-Testing ", "Moving Backward");
+                telemetry.addData("Robot-Testing ", "grabStone");
                 telemetry.update();
-                robot.moveBackwardForTime(1, 1000, true);
+                //robot.moveBackwardForTime(1, 1000, true);
+                robot.grabStone();
             }
 
             if (this.gamepad1.b == true) {
-                telemetry.addData("Robot-Testing ", "Moving Right");
+                telemetry.addData("Robot-Testing ", "dropStone");
                 telemetry.update();
-                robot.moveRightForTime(0.3, 2000, true);
+                //robot.moveRightForTime(0.3, 2000, true);
+                robot.dropStone();
             }
             if (this.gamepad1.y == true) {
               /*  telemetry.addData("Robot-Testing ", "Moving Forward");
                 telemetry.update();
                 robot.moveForwardForTime(1, 1000, true);*/
-                telemetry.addData("Robot-Testing ", "Slide-Down");
+                telemetry.addData("Robot-Testing ", "Slide-Up");
                 telemetry.update();
-                robot.moveSlideDown(0.2, 1);
+                robot.moveSlideUp(1, 1);
             }
             if (this.gamepad1.a == true) {
                 /*telemetry.addData("Robot-Testing ", "Moving Left");
                 telemetry.update();
                 robot.moveLeftForTime(0.3, 2000, true); */
-                telemetry.addData("Robot-Testing ", "Slide-up");
+                telemetry.addData("Robot-Testing ", "Slide-Down");
                 telemetry.update();
-                robot.moveSlideUp(0.2, 1);
-            }
-
-            if (this.gamepad2.x == true) {
-                telemetry.addData("Grabber", "Extending");
-                telemetry.update();
-                robot.turnWithAngleClockwise(0.5, 90);
+                robot.moveSlideDown(1, 1);
             }
 
             if (this.gamepad2.y == true) {
-                telemetry.addData("Grabber", "Extending");
+                telemetry.addData("Grabber", "Forward");
                 telemetry.update();
-                robot.turnWithAngleAnticlockwise(0.5, 90);
+                robot.moveForwardToPosition(0.5, 8);
+            }
+            if (this.gamepad2.a == true) {
+                telemetry.addData("Grabber", "Backward");
+                telemetry.update();
+                robot.moveBackwardToPosition(0.5, 8);
+            }
+            if (this.gamepad2.b == true){
+                telemetry.addData("Clamp", "Up");
+                telemetry.update();
+                robot.ClampUp(250);
+            }
+            if (this.gamepad2.x == true){
+                telemetry.addData("Clamp", "Down");
+                telemetry.update();
+                robot.ClampDown(250);
             }
 
         };
