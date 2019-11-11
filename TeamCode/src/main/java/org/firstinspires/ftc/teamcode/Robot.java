@@ -741,31 +741,11 @@ public class Robot extends java.lang.Thread {
 
 
 
-    public void moveB(long distance) {
-        telemetry.addData("Direction", "Forward");
-        telemetry.update();
-        Motor_FL.setPower(0.8);
-        Motor_FR.setPower(-0.8);
-        Motor_BR.setPower(-0.8);
-        Motor_BL.setPower(0.8);
-        try {
-            sleep(distance * movementFactor);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Forward");
-        telemetry.update();
-        if (isTeleOp == false) pause(250);
-    }
-
-    public void moveF(long distance) {
-        Motor_FL.setPower(-0.8); //FL
-        Motor_FR.setPower(0.8); //FR
-        Motor_BR.setPower(0.8); //BR
-        Motor_BL.setPower(-0.8); //BL
+    public void moveB(double power, long distance) {
+        Motor_FL.setPower(power);
+        Motor_FR.setPower((-1) * power);
+        Motor_BR.setPower((-1) * power);
+        Motor_BL.setPower(power);
         try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
@@ -779,8 +759,25 @@ public class Robot extends java.lang.Thread {
         if (isTeleOp == false) pause(250);
     }
 
-    public void moveR(long distance) {
-        double power = 0.8;
+    public void moveF(double power, long distance) {
+        Motor_FL.setPower((-1) * power); //FL
+        Motor_FR.setPower(power); //FR
+        Motor_BR.setPower(power); //BR
+        Motor_BL.setPower((-1) * power); //BL
+        try {
+            sleep(distance * movementFactor);
+        } catch (Exception e) {
+        }
+        Motor_FL.setPower(0);
+        Motor_FR.setPower(0);
+        Motor_BR.setPower(0);
+        Motor_BL.setPower(0);
+        telemetry.addData("Direction", "Backward");
+        telemetry.update();
+        if (isTeleOp == false) pause(250);
+    }
+
+    public void moveR(double power, long distance) {
 
         Motor_FL.setPower(power );
         Motor_FR.setPower(power);
@@ -794,13 +791,12 @@ public class Robot extends java.lang.Thread {
         Motor_FR.setPower(0);
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Left");
+        telemetry.addData("Direction", "Right");
         telemetry.update();
         if (isTeleOp == false) pause(250);
     }
 
-    public void moveL(long distance) {
-        double power = 0.8;
+    public void moveL(double power, long distance) {
 
         Motor_FL.setPower((-1) * power);
         Motor_FR.setPower((-1) * power);
@@ -815,74 +811,11 @@ public class Robot extends java.lang.Thread {
         Motor_FR.setPower(0);
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Right");
+        telemetry.addData("Direction", "Left");
         telemetry.update();
         if (isTeleOp == false) pause(250);
     }
 
-    public void moveFL(long distance) {
-        Motor_FL.setPower(0.5);
-        Motor_BL.setPower(-0.5);
-        try {
-            sleep(distance * movementFactor);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Backward");
-        telemetry.update();
-        if (isTeleOp == false) pause(250);
-    }
-
-    public void moveFR(long distance) {
-        Motor_FR.setPower(-0.5);
-        Motor_BR.setPower(0.5);
-        try {
-            sleep(distance * movementFactor);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Backward");
-        telemetry.update();
-        if (isTeleOp == false) pause(250);
-    }
-
-    public void moveBL(long distance) {
-        Motor_FR.setPower(0.5);
-        Motor_BR.setPower(-0.5);
-        try {
-            sleep(distance * movementFactor);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Backward");
-        telemetry.update();
-        if (isTeleOp == false) pause(250);
-    }
-
-    public void moveBR(long distance) {
-        Motor_FL.setPower(-0.5);
-        Motor_BL.setPower(0.5);
-        try {
-            sleep(distance * movementFactor);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        telemetry.addData("Direction", "Backward");
-        telemetry.update();
-        if (isTeleOp == false) pause(250);
-    }
     public void ClampDown(int time){
         Clamp_L.setPower(0.4);
         Clamp_R.setPower(-0.4);

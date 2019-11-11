@@ -133,11 +133,11 @@ public class loading extends LinearOpMode {
         if (java.lang.Math.abs(location[6]) > 0){
             robot.slowTurn((int)location[6] * (-1));
         }
-        if (location[2] > 5)
+        if (location[2] > 0)
         {
             robot.moveRightToPosition(0.5, (int) location[2]);
         }
-        else if (location[2] > 5)
+        else if (location[2] < 0)
         {
             robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) location[2]));
         }

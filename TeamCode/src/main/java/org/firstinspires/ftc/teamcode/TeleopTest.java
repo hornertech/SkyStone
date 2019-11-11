@@ -34,7 +34,7 @@ public class TeleopTest extends LinearOpMode{
             telemetry.addData("TeleOP", "New Code");
             telemetry.update();
 
-
+            /********** GamePad 1 ****************/
             //Turning
             if (this.gamepad1.left_stick_x > 0.5) {
                 robot.turnForTime(1, 10, false, 1 );
@@ -44,77 +44,84 @@ public class TeleopTest extends LinearOpMode{
                 robot.turnForTime(1, 10, false, -1 );
             }
 
-
+            // Moving
             if (this.gamepad1.right_stick_y > 0.5) {
-                telemetry.addData("Grabber-Rotator", "Moving UP");
-                telemetry.update();
-                robot.moveB(1);
+                robot.moveB(0.8, 1);
             }
 
             if (this.gamepad1.right_stick_y < -0.5) {
-                telemetry.addData("Grabber-Rotator", "Moving Down");
-                telemetry.update();
-                robot.moveF(1);
+                robot.moveF(0.8, 1);
             }
 
             if (this.gamepad1.right_stick_x > 0.5) {
-                telemetry.addData("Grabber-Slide", "Extending");
-                telemetry.update();
-                robot.moveR(1);
+                robot.moveR(0.8, 1);
             }
 
             if (this.gamepad1.right_stick_x < -0.5) {
-                telemetry.addData("Grabber-Slide", "Contracting");
-                telemetry.update();
-            robot.moveL(1);
-        }
+                robot.moveL(0.8, 1);
+            }
 
-            if (this.gamepad1.x == true) {
+            if(this.gamepad1.dpad_left == true) {
+                robot.moveL(0.2, 1);
+            }
 
+            if(this.gamepad1.dpad_right == true) {
+                robot.moveR(0.2, 1);
+            }
+
+            if(this.gamepad1.dpad_up == true) {
+                robot.moveF(0.2, 1);
+            }
+
+            if(this.gamepad1.dpad_down == true) {
+                robot.moveB(0.2, 1);
+            }
+
+            /****************** GamePad 2 **************/
+            // Pincher
+            if (this.gamepad2.x == true) {
                 telemetry.addData("Robot-Testing ", "grabStone");
                 telemetry.update();
-                //robot.moveBackwardForTime(1, 1000, true);
                 robot.grabStone();
             }
 
-            if (this.gamepad1.b == true) {
+            if (this.gamepad2.b == true) {
                 telemetry.addData("Robot-Testing ", "dropStone");
                 telemetry.update();
-                //robot.moveRightForTime(0.3, 2000, true);
                 robot.dropStone();
             }
-            if (this.gamepad1.y == true) {
-              /*  telemetry.addData("Robot-Testing ", "Moving Forward");
-                telemetry.update();
-                robot.moveForwardForTime(1, 1000, true);*/
+
+            // Slide
+            if (this.gamepad2.y == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Up");
                 telemetry.update();
                 robot.moveSlideUp(1, 1);
             }
-            if (this.gamepad1.a == true) {
-                /*telemetry.addData("Robot-Testing ", "Moving Left");
-                telemetry.update();
-                robot.moveLeftForTime(0.3, 2000, true); */
+
+            if (this.gamepad2.a == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down");
                 telemetry.update();
                 robot.moveSlideDown(1, 1);
             }
 
-            if (this.gamepad2.y == true) {
-                telemetry.addData("Grabber", "Forward");
+            if (this.gamepad2.dpad_down == true) {
+                telemetry.addData("Robot-Testing ", "Slide-Down-slow");
                 telemetry.update();
-                robot.moveForwardToPosition(0.5, 8);
+                robot.moveSlideDown(0.5, 0.1);
             }
-            if (this.gamepad2.a == true) {
-                telemetry.addData("Grabber", "Backward");
+
+            if (this.gamepad2.dpad_up == true) {
+                telemetry.addData("Robot-Testing ", "Slide-Down-up");
                 telemetry.update();
-                robot.moveBackwardToPosition(0.5, 8);
+                robot.moveSlideDown(0.5, 0.1);
             }
+
             if (this.gamepad2.b == true){
                 telemetry.addData("Clamp", "Up");
                 telemetry.update();
                 robot.ClampUp(250);
             }
+
             if (this.gamepad2.x == true){
                 telemetry.addData("Clamp", "Down");
                 telemetry.update();
