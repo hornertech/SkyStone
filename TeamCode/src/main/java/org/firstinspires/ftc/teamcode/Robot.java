@@ -1051,6 +1051,31 @@ public class Robot extends java.lang.Thread {
         }
 
     }
+    public void moveSlides(double power, int time) {
+        // Reset all encoders
+        long slide_R_Start = Slide_R.getCurrentPosition();
+        long slide_L_Start = Slide_L.getCurrentPosition();
+
+            Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //Set power of all motors
+        Slide_L.setPower((-1) * power);
+        Slide_R.setPower(power);
+
+        try {
+            sleep(time);
+        } catch (Exception e) {
+        }
+
+        //Reached the distance, so stop the motors
+        Slide_L.setPower(0);
+        Slide_R.setPower(0);
+
+        long Slide_R_End = Slide_R.getCurrentPosition();
+        long Slide_L_End = Slide_L.getCurrentPosition();
+        Log.i(TAG, "Exit Function: moveForwardForTime");
+    }
+
 
 
 }

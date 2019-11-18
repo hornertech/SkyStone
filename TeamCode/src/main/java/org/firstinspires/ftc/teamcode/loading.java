@@ -76,7 +76,7 @@ public class loading extends LinearOpMode {
     private int skystonePicked = 0;
     private int skystoneLocation = 0;
     private int stoneStrafeTime = 620;
-    private int stoneForwardTime = 150;
+    private int stoneForwardTime = 200;
 
     void detectOnce(List<VuforiaTrackable> allTrackables) {
         // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
@@ -135,7 +135,8 @@ public class loading extends LinearOpMode {
         }
         if (location[2] > 0)
         {
-            robot.moveRightToPosition(0.5, (int) location[2]);
+            double correctionDistance = location[2]*1.4;
+            robot.moveRightToPosition(0.5, (int) correctionDistance - 2);
         }
         else if (location[2] < 0)
         {
@@ -212,29 +213,11 @@ public class loading extends LinearOpMode {
 
         Robot.moveForwardForTime(1, 300, false);
         Robot.dropStone();
-        Robot.moveSlideUp(1, 2);
-        /*
-        for (int j = 0; j < 2; j++ ) {
-            detectOnce(allTrackables);
-            sleep(100);
-        }
-        moveToSkyStone(Robot);
-        Robot.grabStone();
-        Robot.moveSlideDown(1, 1.7);
-        sleep(1000);
-        Robot.moveBackwardForTime(0.5, 100, false); // move little back
-        Robot.slowTurn(90);
-        Robot.moveForwardForTime(1, 1200, false);
-        Robot.dropStone();
-        Robot.moveSlideUp(1, 1.5);
-        Robot.moveBackwardForTime(1, 200, false);
-        Robot.moveSlideDown(1, 1.5);
-        Robot.moveBackwardForTime(1, 1000, false);
-        */
+        Robot.moveSlideUp(1, 1.6);
 
       //  while (!isStopRequested()) {
                 for (i = skystoneLocation; i < 6; i++) {
-                        sleep(500);
+                        sleep(250);
                       detectOnce(allTrackables);
                    if (location[0] == 1) {
                         // Assuming it's already infront
@@ -242,18 +225,18 @@ public class loading extends LinearOpMode {
                         skystonePicked++;
                        moveToSkyStone(Robot);
                        Robot.grabStone();
-                       Robot.moveSlideDown(1, 2);
-                       sleep(1000);
+                       Robot.moveSlideDown(1, 1.6);
+                       sleep(750);
                        Robot.moveBackwardForTime(0.5, 200, false); // move little back
                        Robot.slowTurn(90);
                        Robot.moveForwardForTime(1, 1200 + ((skystoneLocation + 1) * stoneForwardTime), false);
                        Robot.dropStone();
-                       Robot.moveSlideUp(1, 2);
+                       Robot.moveSlideUp(1, 1.6);
                        Robot.moveBackwardForTime(1, 150, false);
-                       Robot.moveSlideDown(1, 2);
+                       Robot.moveSlideDown(1, 1.6);
                         if (skystonePicked == 2)
                         {
-                            //Park
+                            Robot.moveBackwardForTime(1,400, false);
                             skystoneLocation = 6;
                             break;
                         }
@@ -262,13 +245,14 @@ public class loading extends LinearOpMode {
                             Robot.moveBackwardForTime(1, 1000 + ((skystoneLocation + 1) * stoneForwardTime) , false);
                             Robot.moveSlideUp(1, 1.6);
                             Robot.slowTurn(-90);
-                            Robot.moveBackwardForTime(1, 150 , false);
+                            Robot.moveBackwardForTime(0.5, 150 , false);
 
                         }
 
                     }
                     else
                     {
+                        Robot.slowTurn(-1.5);
                         Robot.moveRightForTime(0.5,stoneStrafeTime, false );
                     }
                 }

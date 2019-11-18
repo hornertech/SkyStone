@@ -37,11 +37,11 @@ public class TeleopTest extends LinearOpMode{
             /********** GamePad 1 ****************/
             //Turning
             if (this.gamepad1.left_stick_x > 0.5) {
-                robot.turnForTime(1, 10, false, 1 );
+                robot.turnForTime(1, 10, false, -1 );
             }
 
             if (this.gamepad1.left_stick_x < -0.5) {
-                robot.turnForTime(1, 10, false, -1 );
+                robot.turnForTime(1, 10, false, 1 );
             }
 
             // Moving
@@ -54,27 +54,27 @@ public class TeleopTest extends LinearOpMode{
             }
 
             if (this.gamepad1.right_stick_x > 0.5) {
-                robot.moveR(0.8, 1);
+                robot.moveL(1, 10);
             }
 
             if (this.gamepad1.right_stick_x < -0.5) {
-                robot.moveL(0.8, 1);
+                robot.moveR(1, 10);
             }
 
             if(this.gamepad1.dpad_left == true) {
-                robot.moveL(0.2, 1);
+                robot.moveR(0.4, 10);
             }
 
             if(this.gamepad1.dpad_right == true) {
-                robot.moveR(0.2, 1);
+                robot.moveL(0.4, 10);
             }
 
             if(this.gamepad1.dpad_up == true) {
-                robot.moveF(0.2, 1);
+                robot.moveF(0.4, 1);
             }
 
             if(this.gamepad1.dpad_down == true) {
-                robot.moveB(0.2, 1);
+                robot.moveB(0.4, 1);
             }
 
             /****************** GamePad 2 **************/
@@ -95,37 +95,44 @@ public class TeleopTest extends LinearOpMode{
             if (this.gamepad2.y == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Up");
                 telemetry.update();
-                robot.moveSlideUp(1, 1);
+                robot.moveSlideUp(1, 1.25);
             }
 
             if (this.gamepad2.a == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down");
                 telemetry.update();
-                robot.moveSlideDown(1, 1);
+                robot.moveSlideDown(1, 1.25);
             }
 
             if (this.gamepad2.dpad_down == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down-slow");
                 telemetry.update();
-                robot.moveSlideDown(0.5, 0.1);
+                robot.moveSlideDown(1, 0.2);
             }
 
             if (this.gamepad2.dpad_up == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down-up");
                 telemetry.update();
-                robot.moveSlideDown(0.5, 0.1);
+                robot.moveSlideUp(1, 0.2);
             }
 
-            if (this.gamepad2.b == true){
+            if (this.gamepad1.b == true){
                 telemetry.addData("Clamp", "Up");
                 telemetry.update();
                 robot.ClampUp(250);
             }
 
-            if (this.gamepad2.x == true){
+            if (this.gamepad1.x == true){
                 telemetry.addData("Clamp", "Down");
                 telemetry.update();
                 robot.ClampDown(250);
+            }
+            if (this.gamepad2.right_stick_y > 0.5) {
+                robot.moveSlides(1, 1);
+            }
+
+            if (this.gamepad2.right_stick_y < -0.5) {
+                robot.moveSlides(-1, 1);
             }
 
         };
