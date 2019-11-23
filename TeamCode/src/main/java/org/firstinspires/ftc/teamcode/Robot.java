@@ -3,7 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -996,6 +1001,13 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
+    // The IMU sensor object
+    BNO055IMU imu;
+
+    // State used for updating telemetry
+    Orientation angles;
+
+
     public void dropStone() {
         Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
         pincher.setPosition(0.84);
@@ -1006,6 +1018,94 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Enter Function setPosition Start Position:" + pincher.getPosition());
        pincher.setPosition(position);
         Log.i(TAG, "Exit Function setPosition End Position:" + pincher.getPosition());
+    }
+
+    public void moveWithSlide(double power, int distance,int direction, double slideRotation, int slideDirection) {
+        Log.i(TAG, "Enter Function: moveForwardToPosition Power : " + power + " and distance : " + distance);
+        // Reset all encoders
+        Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //Find the motor ticks needed to travel the required distance
+        int ticks = DistanceToTick(distance);
+        //Find the motor ticks needed to travel the required distance
+        int slideTicks = (int) (slideRotation * TICKS_PER_ROTATION);
+
+        // Set the target position for all motors (in ticks)
+        Motor_FL.setTargetPosition((direction) * (-1) * ticks);
+        Motor_FR.setTargetPosition((direction) * ticks);
+        Motor_BR.setTargetPosition((direction) * ticks);
+        Motor_BL.setTargetPosition((direction) * (-1) * ticks);
+
+        // Set the target position for all motors (in ticks)
+        Slide_L.setTargetPosition((slideDirection) * slideTicks);
+        Slide_R.setTargetPosition((slideDirection) * (-1) * slideTicks);
+
+        //Set power of all motors
+        Motor_FL.setPower(power);
+        Motor_FR.setPower(power);
+        Motor_BR.setPower(power);
+        Motor_BL.setPower(power);
+
+        //Set power of all motors
+        Slide_R.setPower(1);
+        Slide_L.setPower(1);
+
+        //Set Motors to RUN_TO_POSITION
+        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Set Motors to RUN_TO_POSITION
+        Motor_FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Wait for them to reach to the position
+        //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
+        while (Motor_FL.isBusy() || Slide_L.isBusy()) {
+            if (DEBUG_DEBUG) {
+                Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
+                Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
+                Log.i(TAG, "Actual Ticks Motor2 : " + Motor_BR.getCurrentPosition());
+                Log.i(TAG, "Actual Ticks Motor3 : " + Motor_BL.getCurrentPosition());
+            }
+            //Waiting for Robot to travel the distance
+            telemetry.addData("Backward", "Moving");
+            telemetry.update();
+        }
+
+
+        //Reached the distance, so stop the motors
+        Motor_FL.setPower(0);
+        Motor_FR.setPower(0);
+        Motor_BR.setPower(0);
+        Motor_BL.setPower(0);
+        Slide_R.setPower(0);
+        Slide_L.setPower(0);
+
+        if (DEBUG_INFO) {
+            Log.i(TAG, "TICKS needed : " + ticks);
+            Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
+            Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
+            Log.i(TAG, "Actual Ticks Motor2 : " + Motor_BR.getCurrentPosition());
+            Log.i(TAG, "Actual Ticks Motor3 : " + Motor_BL.getCurrentPosition());
+            Log.i(TAG, "Exit Function: moveForwardToPosition");
+        }
+    }
+
+    public void fixOrientation(double degree)
+    {
+
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Log.i(TAG, "Current Orientation First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle );
+        double diff = degree - angles.firstAngle;
+        slowTurn(diff);
+
     }
 
     private void initDeviceCore() throws Exception {
@@ -1027,10 +1127,14 @@ public class Robot extends java.lang.Thread {
 
         pincher = hardwareMap.get(Servo.class, "pincher");
 
+        BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
+        parametersIMU.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parametersIMU);
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-
     }
 
 

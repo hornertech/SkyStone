@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -19,6 +20,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 
 import java.util.ArrayList;
@@ -39,6 +48,8 @@ public class loading extends LinearOpMode {
 
     public String TAG = "FTC";
     //---------------------------------------------------------------------------------------
+
+
 
     private static final String VUFORIA_KEY = "AV8zEej/////AAABmVo2vNWmMUkDlkTs5x1GOThRP0cGar67mBpbcCIIz/YtoOvVynNRmJv/0f9Jhr9zYd+f6FtI0tYHqag2teC5GXiKrNM/Jl7FNyNGCvO9zVIrblYF7genK1FVH3X6/kQUrs0vnzd89M0uSAljx0mAcgMEEUiNOUHh2Fd7IOgjlnh9FiB+cJ8bu/3WeKDxnDdqx6JI5BlQ4w7YW+3X2icSRDRlvE4hhuW1VM1BTPQgds7OtHKqUn4Z5w1Wqg/dWiOHxYTww28PVeg3ae4c2l8FUtE65jr2qQdQNc+DMLDgnJ0fUi9Ww28OK/aNrQQnHU97TnUgjLgCTlV7RXpfut5mZWXbWvO6wA6GGkm3fAIQ2IPL";
     private VuforiaLocalizer vuforia = null;
@@ -117,7 +128,12 @@ public class loading extends LinearOpMode {
             location[4] = rotation.firstAngle;
             location[5] = rotation.secondAngle;
             location[6] = rotation.thirdAngle;
-
+            for(int check = 1; check < 7; check++){
+                if(location[check] > 30){
+                    location[0] = 0;
+                    break;
+                }
+            }
             Log.i(TAG, "Positions: X =" + location[1] + " Y = " + location[2] + " Z = " + location[3]);
             Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
         } else {
@@ -135,23 +151,28 @@ public class loading extends LinearOpMode {
         }
         if (location[2] > 0)
         {
-            double correctionDistance = location[2]*1.4;
-            robot.moveRightToPosition(0.5, (int) correctionDistance - 2);
+            double correctionDistance = (location[2]-2)*1.8;
+            robot.moveRightToPosition(0.5, (int) correctionDistance);
         }
         else if (location[2] < 0)
         {
             robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) location[2]));
         }
 
-        robot.moveForwardToPosition(0.3, (java.lang.Math.abs((int) location[1]) - 4));
+        robot.moveForwardToPosition(0.3, (java.lang.Math.abs((int) location[1]) - 3));
     }
+
+
     //The Autonomous Program
     public void runOpMode() {
 
 
         int detect_result;
         int i;
+
+
        // initVuforia();
+
 
         //Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -210,50 +231,76 @@ public class loading extends LinearOpMode {
         Log.i(TAG, "*************Starting Autonomous TEST**************************");
 
         targetsSkyStone.activate();
-
-        Robot.moveForwardForTime(1, 300, false);
-        Robot.dropStone();
-        Robot.moveSlideUp(1, 1.6);
-
+      //  angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+     //   Log.i(TAG, "Start Angle First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle);
+    //    Robot.moveForwardForTime(1, 325, false);
+       Robot.dropStone();
+   //     Robot.moveSlideUp(1, 1.8);
+        Robot.moveWithSlide(0.5, 22,1, 1.8, 1);
       //  while (!isStopRequested()) {
-                for (i = skystoneLocation; i < 6; i++) {
+                for (i = skystoneLocation; i < 5; i++) {
                         sleep(250);
-                      detectOnce(allTrackables);
-                   if (location[0] == 1) {
+                        detectOnce(allTrackables);
+                        detectOnce(allTrackables);
+                        detectOnce(allTrackables);
+                    if (location[0] == 1) {
                         // Assuming it's already infront
                         skystoneLocation = i;
                         skystonePicked++;
                        moveToSkyStone(Robot);
                        Robot.grabStone();
-                       Robot.moveSlideDown(1, 1.6);
+                       Robot.moveSlideDown(1, 1.8);
                        sleep(750);
-                       Robot.moveBackwardForTime(0.5, 200, false); // move little back
+                       Robot.moveBackwardForTime(1, 125, false); // move little back
                        Robot.slowTurn(90);
-                       Robot.moveForwardForTime(1, 1200 + ((skystoneLocation + 1) * stoneForwardTime), false);
+                      // Robot.moveForwardForTime(1, 800 + ((skystoneLocation + 1) * stoneForwardTime), false);
+                        sleep(300);
+                        Robot.fixOrientation(90);
+                        Robot.moveForwardToPosition(1, 32 + (skystoneLocation + 1)*8);
+                       //Robot.moveSlideUp(1, 3);
+                       //Robot.moveForwardForTime(0.3, 500, false);
+                       Robot.moveWithSlide(0.2, 10,1, 2.6, 1);
                        Robot.dropStone();
-                       Robot.moveSlideUp(1, 1.6);
-                       Robot.moveBackwardForTime(1, 150, false);
-                       Robot.moveSlideDown(1, 1.6);
+                       sleep(500);
+                       //Robot.moveBackwardForTime(1, 150, false);
+                       //Robot.moveSlideDown(1, 2.6);
+                        Robot.moveWithSlide(0.2, 10,-1, 2.6, -1);
                         if (skystonePicked == 2)
                         {
-                            Robot.moveBackwardForTime(1,400, false);
+                            Robot.moveBackwardForTime(1,300, false);
                             skystoneLocation = 6;
                             break;
                         }
                         else {
                             // goto detect new stone
-                            Robot.moveBackwardForTime(1, 1000 + ((skystoneLocation + 1) * stoneForwardTime) , false);
-                            Robot.moveSlideUp(1, 1.6);
+                            Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime) , false);
+                            Robot.moveSlideUp(1, 1.8);
                             Robot.slowTurn(-90);
-                            Robot.moveBackwardForTime(0.5, 150 , false);
-
+                            Robot.moveBackwardForTime(0.5, 100 , false);
                         }
 
                     }
                     else
                     {
-                        Robot.slowTurn(-1.5);
+                        Robot.slowTurn(-0.5);
                         Robot.moveRightForTime(0.5,stoneStrafeTime, false );
+                    }
+                    if(i == 5 & skystonePicked != 2){
+                        Robot.moveBackwardForTime(1, 550, false);
+                        Robot.moveBackwardForTime(0.2, 300, false);
+                        Robot.moveForwardForTime(1,738,false);
+                        Robot.moveRightForTime(0.4,400, false);
+                        Robot.slowTurn(-15);
+                        Robot.moveSlideDown(1, 1.8);
+                        Robot.moveBackwardForTime(1, 300, false);
+                        Robot.slowTurn(-15);
+                        Robot.grabStone();
+                        sleep(1500);
+                        Robot.slowTurn(125);
+                        Robot.moveBackwardForTime(0.5, 300, false);
+                        Robot.moveRightForTime(1, 250, false);
+                        Robot.moveForwardForTime(1, 2850, false);
+                        Robot.moveBackwardForTime(1, 300, false);
                     }
                 }
        // }
