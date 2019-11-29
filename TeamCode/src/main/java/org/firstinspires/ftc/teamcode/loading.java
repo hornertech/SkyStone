@@ -43,10 +43,20 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 @Autonomous
 public class loading extends LinearOpMode {
 
+    DigitalChannel digitalTouch;  // Hardware Device Object
+    //---------------------------------------------------------------------------------------
+
     public String TAG = "FTC";
+    //---------------------------------------------------------------------------------------
+
+
 
     private static final String VUFORIA_KEY = "AV8zEej/////AAABmVo2vNWmMUkDlkTs5x1GOThRP0cGar67mBpbcCIIz/YtoOvVynNRmJv/0f9Jhr9zYd+f6FtI0tYHqag2teC5GXiKrNM/Jl7FNyNGCvO9zVIrblYF7genK1FVH3X6/kQUrs0vnzd89M0uSAljx0mAcgMEEUiNOUHh2Fd7IOgjlnh9FiB+cJ8bu/3WeKDxnDdqx6JI5BlQ4w7YW+3X2icSRDRlvE4hhuW1VM1BTPQgds7OtHKqUn4Z5w1Wqg/dWiOHxYTww28PVeg3ae4c2l8FUtE65jr2qQdQNc+DMLDgnJ0fUi9Ww28OK/aNrQQnHU97TnUgjLgCTlV7RXpfut5mZWXbWvO6wA6GGkm3fAIQ2IPL";
     private VuforiaLocalizer vuforia = null;
+
+    //Define Position of Camera
+    // CAMERA_CHOICE = BACK (rear camera) or FRONT (selfie camera)
+    // PHONE_IS_PORTRAIT = true(portrait) or false(landscape)
 
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_PORTRAIT = false  ;
@@ -67,7 +77,11 @@ public class loading extends LinearOpMode {
     private float phoneZRotate    = 0;
 
     private double location[] = {0, 0, 0, 0, 0, 0, 0};
-
+    // Location[0] : 0 = Target not visible, 1 = Target visible
+    // Location[1] : Lateral drift from target
+    // Location[2] : Distance from Target
+    // Location[3] : Vertical shift, not needed for our program
+    // Location[4]
     private int boardDistance = 30;
     private int bridgeOffset = 10;
     private int skystonePicked = 0;
@@ -152,13 +166,18 @@ public class loading extends LinearOpMode {
     //The Autonomous Program
     public void runOpMode() {
 
+
         int detect_result;
         int i;
+
+
+       // initVuforia();
+
 
         //Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = CAMERA_CHOICE;
+        parameters.cameraDirection   = CAMERA_CHOICE;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -176,9 +195,9 @@ public class loading extends LinearOpMode {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
 
         // Next, translate the camera lens to where it is on the robot.
-        final float CAMERA_FORWARD_DISPLACEMENT = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
+        final float CAMERA_FORWARD_DISPLACEMENT  = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
         final float CAMERA_VERTICAL_DISPLACEMENT = 5.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
@@ -193,7 +212,7 @@ public class loading extends LinearOpMode {
 
         // Rotate the phone vertical about the X axis if it's in portrait mode
         if (PHONE_IS_PORTRAIT) {
-            phoneXRotate = 90;
+            phoneXRotate = 90 ;
         }
         OpenGLMatrix robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -212,76 +231,81 @@ public class loading extends LinearOpMode {
         Log.i(TAG, "*************Starting Autonomous TEST**************************");
 
         targetsSkyStone.activate();
-        //  angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        //   Log.i(TAG, "Start Angle First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle);
-        //    Robot.moveForwardForTime(1, 325, false);
-        Robot.dropStone();
-        //     Robot.moveSlideUp(1, 1.8);
-        Robot.moveWithSlide(0.5, 22, 1, 1.8, 1);
-        //  while (!isStopRequested()) {
-        for (i = skystoneLocation; i < 5; i++) {
-            sleep(250);
-            detectOnce(allTrackables);
-            detectOnce(allTrackables);
-            detectOnce(allTrackables);
-            if (location[0] == 1) {
-                skystoneLocation = i;
-                skystonePicked++;
-                moveToSkyStone(Robot);
-                Robot.grabStone();
-                Robot.moveSlideDown(1, 1.8);
-                sleep(750);
-                Robot.moveBackwardForTime(1, 125, false); // move little back
-                Robot.slowTurn(90);
-                // Robot.moveForwardForTime(1, 800 + ((skystoneLocation + 1) * stoneForwardTime), false);
-                sleep(300);
-                Robot.fixOrientation(90);
-                Robot.moveForwardToPosition(1, 32 + (skystoneLocation + 1) * 8);
-                //Robot.moveSlideUp(1, 3);
-                //Robot.moveForwardForTime(0.3, 500, false);
-                Robot.moveWithSlide(0.2, 10, 1, 2.6, 1);
-                Robot.dropStone();
-                sleep(500);
-                //Robot.moveBackwardForTime(1, 150, false);
-                //Robot.moveSlideDown(1, 2.6);
-                Robot.moveWithSlide(0.2, 10, -1, 2.6, -1);
-                if (skystonePicked == 2) {
-                    Robot.moveBackwardForTime(1, 300, false);
-                    skystoneLocation = 6;
-                    break;
-                } else {
-                    // goto detect new stone
-                    Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime), false);
-                    Robot.moveSlideUp(1, 1.8);
-                    Robot.slowTurn(-90);
-                    Robot.moveBackwardForTime(0.5, 100, false);
+      //  angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+     //   Log.i(TAG, "Start Angle First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle);
+    //    Robot.moveForwardForTime(1, 325, false);
+       Robot.dropStone();
+   //     Robot.moveSlideUp(1, 1.8);
+        Robot.moveWithSlide(0.5, 22,1, 1.8, 1);
+      //  while (!isStopRequested()) {
+                for (i = skystoneLocation; i < 5; i++) {
+                        sleep(250);
+                        detectOnce(allTrackables);
+                        detectOnce(allTrackables);
+                        detectOnce(allTrackables);
+                    if (location[0] == 1) {
+                        // Assuming it's already infront
+                        skystoneLocation = i;
+                        skystonePicked++;
+                       moveToSkyStone(Robot);
+                       Robot.grabStone();
+                       Robot.moveSlideDown(1, 1.8);
+                       sleep(750);
+                       Robot.moveBackwardForTime(1, 125, false); // move little back
+                       Robot.slowTurn(90);
+                      // Robot.moveForwardForTime(1, 800 + ((skystoneLocation + 1) * stoneForwardTime), false);
+                        sleep(300);
+                        Robot.fixOrientation(90);
+                        Robot.moveForwardToPosition(1, 32 + (skystoneLocation + 1)*8);
+                       //Robot.moveSlideUp(1, 3);
+                       //Robot.moveForwardForTime(0.3, 500, false);
+                       Robot.moveWithSlide(0.2, 10,1, 2.6, 1);
+                       Robot.dropStone();
+                       sleep(500);
+                       //Robot.moveBackwardForTime(1, 150, false);
+                       //Robot.moveSlideDown(1, 2.6);
+                        Robot.moveWithSlide(0.2, 10,-1, 2.6, -1);
+                        if (skystonePicked == 2)
+                        {
+                            Robot.moveBackwardForTime(1,300, false);
+                            skystoneLocation = 6;
+                            break;
+                        }
+                        else {
+                            // goto detect new stone
+                            Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime) , false);
+                            Robot.moveSlideUp(1, 1.8);
+                            Robot.slowTurn(-90);
+                            Robot.moveBackwardForTime(0.5, 100 , false);
+                        }
+
+                    }
+                    else
+                    {
+                        Robot.slowTurn(-0.5);
+                        Robot.moveRightForTime(0.5,stoneStrafeTime, false );
+                    }
+                    if(i == 5 & skystonePicked != 2){
+                        Robot.moveBackwardForTime(1, 550, false);
+                        Robot.moveBackwardForTime(0.2, 300, false);
+                        Robot.moveForwardForTime(1,738,false);
+                        Robot.moveRightForTime(0.4,400, false);
+                        Robot.slowTurn(-15);
+                        Robot.moveSlideDown(1, 1.8);
+                        Robot.moveBackwardForTime(1, 300, false);
+                        Robot.slowTurn(-15);
+                        Robot.grabStone();
+                        sleep(1500);
+                        Robot.slowTurn(125);
+                        Robot.moveBackwardForTime(0.5, 300, false);
+                        Robot.moveRightForTime(1, 250, false);
+                        Robot.moveForwardForTime(1, 2850, false);
+                        Robot.moveBackwardForTime(1, 300, false);
+                    }
                 }
+       // }
 
-            } else {
-                Robot.slowTurn(-0.5);
-                Robot.moveRightForTime(0.5, stoneStrafeTime, false);
-            }
-            if (i == 5 & skystonePicked != 2) {
-                Robot.moveBackwardForTime(1, 550, false);
-                Robot.moveBackwardForTime(0.2, 300, false);
-                Robot.moveForwardForTime(1, 738, false);
-                Robot.moveRightForTime(0.4, 400, false);
-                Robot.slowTurn(-15);
-                Robot.moveSlideDown(1, 1.8);
-                Robot.moveBackwardForTime(1, 300, false);
-                Robot.slowTurn(-15);
-                Robot.grabStone();
-                sleep(1500);
-                Robot.slowTurn(125);
-                Robot.moveBackwardForTime(0.5, 300, false);
-                Robot.moveRightForTime(1, 250, false);
-                Robot.moveForwardForTime(1, 2850, false);
-                Robot.moveBackwardForTime(1, 300, false);
-            }
-        }
-        // }
-
-        targetsSkyStone.deactivate();
+       targetsSkyStone.deactivate();
 
     }
 
