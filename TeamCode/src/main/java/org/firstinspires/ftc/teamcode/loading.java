@@ -177,13 +177,15 @@ public class loading extends LinearOpMode {
         int i;
 
 
-        // initVuforia();
+
+       // initVuforia();
+
 
 
         //Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = CAMERA_CHOICE;
+        parameters.cameraDirection   = CAMERA_CHOICE;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -201,9 +203,9 @@ public class loading extends LinearOpMode {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
 
         // Next, translate the camera lens to where it is on the robot.
-        final float CAMERA_FORWARD_DISPLACEMENT = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
+        final float CAMERA_FORWARD_DISPLACEMENT  = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
         final float CAMERA_VERTICAL_DISPLACEMENT = 5.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
@@ -218,7 +220,7 @@ public class loading extends LinearOpMode {
 
         // Rotate the phone vertical about the X axis if it's in portrait mode
         if (PHONE_IS_PORTRAIT) {
-            phoneXRotate = 90;
+            phoneXRotate = 90 ;
         }
         OpenGLMatrix robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -277,7 +279,9 @@ public class loading extends LinearOpMode {
                     Robot.slowTurn(-90);
                     sleep(300);
                     Robot.fixOrientation(0);
+
                 }
+       // }
 
             } else {
                 Robot.slowTurn(-0.5);
