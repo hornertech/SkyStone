@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 
 @Autonomous
-public class buildingRed extends LinearOpMode {
+public class buildingBlue extends LinearOpMode {
 
     public String TAG = "FTC";
     //---------------------------------------------------------------------------------------
@@ -26,10 +26,9 @@ public class buildingRed extends LinearOpMode {
         waitForStart();
         Log.i(TAG, "*************Starting Autonomous TEST**************************");
 
-        Robot.moveForwardForTime(0.5, 400, false);
+        Robot.moveBackwardForTime(0.5, 355, false);
         Robot.moveLeftForTime(0.6, 500, false);
-        sleep(400);
-        Robot.fixOrientation(0);
+        //Robot.fixOrientation(0);
         Robot.moveLeftForTime(0.6, 1600, false);
         Robot.ClampDown(200);
         sleep(1000);
@@ -40,20 +39,17 @@ public class buildingRed extends LinearOpMode {
         //Robot.fixOrientation(0);
         //Robot.slowTurn(-20);
         Robot.moveRightForTime(1, 1900, false);
-        Robot.ClampUp(150);
-        Robot.moveRightForTime(0.3, 1500, false);  // allign with alliance wall
-        //Robot.moveBackwardForTime(0.3, 2000, false);
-        Robot.moveBackwardForTime(0.7, 1000, false);
+        Robot.ClampUp(120);
+        Robot.moveRightForTime(0.3, 3000, false);  // allign with alliance wall
+        Robot.moveBackwardForTime(0.3, 2000, false);
+        Robot.moveForwardForTime(0.7, 1800, false);
         Robot.moveLeftForTime(1, 800, false);
-        Robot.slowTurn(180);
-        sleep(400);
-        Robot.fixOrientation(180);
-        Robot.moveBackwardForTime(0.3, 1750, false);
+        Robot.moveBackwardForTime(0.3, 1900, false);
         Robot.moveForwardForTime(0.2, 150, false);
-        Robot.moveLeftForTime(0.5, 1200, false);
-        Robot.moveRightForTime(0.5, 50, false);
+        Robot.moveRightForTime(0.5, 1200, false);
+        Robot.moveLeftForTime(0.5, 50, false);
         Robot.moveForwardForTime(1, 700, false);
-        Robot.moveLeftForTime(0.25, 2000, false);
+        Robot.moveRightForTime(0.25, 2000, false);
     }
 
 

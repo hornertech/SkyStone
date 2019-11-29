@@ -41,7 +41,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 
 @Autonomous
-public class loading extends LinearOpMode {
+public class loadingBlue extends LinearOpMode {
 
     DigitalChannel digitalTouch;  // Hardware Device Object
     //---------------------------------------------------------------------------------------

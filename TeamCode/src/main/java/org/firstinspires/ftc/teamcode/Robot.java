@@ -41,6 +41,13 @@ public class Robot extends java.lang.Thread {
 
     public ElapsedTime mRuntime;
 
+
+    // The IMU sensor object
+    BNO055IMU imu;
+
+    // State used for updating telemetry
+    Orientation angles;
+
     public boolean isTeleOp = true;
     public boolean DEBUG_DEBUG = false;
     public boolean DEBUG_INFO = false;
@@ -134,7 +141,7 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
-        while (Motor_FL.isBusy()) {
+        while (Motor_BL.isBusy()) {
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -1001,19 +1008,26 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
-    // The IMU sensor object
-    BNO055IMU imu;
-
-    // State used for updating telemetry
-    Orientation angles;
 
 
     public void dropStone() {
         Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
-        pincher.setPosition(0.84);
+        pincher.setPosition(0.7325);
         Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
      }
 
+    public void grabStone1() {
+        Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
+        pincher.setPosition(0.8);
+        Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
+    }
+
+
+    public void dropStone1() {
+        Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
+        pincher.setPosition(1);
+        Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
+    }
     public void setPosition(double position) {
         Log.i(TAG, "Enter Function setPosition Start Position:" + pincher.getPosition());
        pincher.setPosition(position);
@@ -1098,6 +1112,38 @@ public class Robot extends java.lang.Thread {
         }
     }
 
+    public void moveWithSlide1(double power, int time,int direction, double slideRotation, int slideDirection) {
+        Log.i(TAG, "Enter Function: moveWithSlide1 ");
+        // Reset all encoders
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        Motor_FL.setPower((direction) * (-1) * power);
+        Motor_FR.setPower((direction) * power);
+        Motor_BR.setPower((direction) * power);
+        Motor_BL.setPower((direction) * (-1) * power);
+
+        Slide_L.setPower((slideDirection) * 1);
+        Slide_R.setPower((slideDirection) * (-1));
+
+        try {
+            sleep(time);
+        } catch (Exception e) {
+        }
+
+        //Reached the distance, so stop the motors
+        Motor_FL.setPower(0);
+        Motor_FR.setPower(0);
+        Motor_BR.setPower(0);
+        Motor_BL.setPower(0);
+        Slide_R.setPower(0);
+        Slide_L.setPower(0);
+    }
+
     public void fixOrientation(double degree)
     {
 
@@ -1132,6 +1178,9 @@ public class Robot extends java.lang.Thread {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersIMU);
+
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Log.i(TAG, "Start Orientation First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle );
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
