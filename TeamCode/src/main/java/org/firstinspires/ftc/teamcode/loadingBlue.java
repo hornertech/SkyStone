@@ -18,17 +18,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.Came
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,24 +28,12 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
-
 @Autonomous
 public class loadingBlue extends LinearOpMode {
 
-    DigitalChannel digitalTouch;  // Hardware Device Object
-    //---------------------------------------------------------------------------------------
-
     public String TAG = "FTC";
-    //---------------------------------------------------------------------------------------
-
-
-
     private static final String VUFORIA_KEY = "AV8zEej/////AAABmVo2vNWmMUkDlkTs5x1GOThRP0cGar67mBpbcCIIz/YtoOvVynNRmJv/0f9Jhr9zYd+f6FtI0tYHqag2teC5GXiKrNM/Jl7FNyNGCvO9zVIrblYF7genK1FVH3X6/kQUrs0vnzd89M0uSAljx0mAcgMEEUiNOUHh2Fd7IOgjlnh9FiB+cJ8bu/3WeKDxnDdqx6JI5BlQ4w7YW+3X2icSRDRlvE4hhuW1VM1BTPQgds7OtHKqUn4Z5w1Wqg/dWiOHxYTww28PVeg3ae4c2l8FUtE65jr2qQdQNc+DMLDgnJ0fUi9Ww28OK/aNrQQnHU97TnUgjLgCTlV7RXpfut5mZWXbWvO6wA6GGkm3fAIQ2IPL";
     private VuforiaLocalizer vuforia = null;
-
-    //Define Position of Camera
-    // CAMERA_CHOICE = BACK (rear camera) or FRONT (selfie camera)
-    // PHONE_IS_PORTRAIT = true(portrait) or false(landscape)
 
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_PORTRAIT = false  ;
@@ -81,7 +58,9 @@ public class loadingBlue extends LinearOpMode {
     // Location[1] : Lateral drift from target
     // Location[2] : Distance from Target
     // Location[3] : Vertical shift, not needed for our program
-    // Location[4]
+    // Location[4] : Vertical Angle Shift; Not useful for our program
+    // Location[5] : Upward Angle Shift; Not useful for our program
+    // Location[6] : Horizontal Angle Shift
     private int boardDistance = 30;
     private int bridgeOffset = 10;
     private int skystonePicked = 0;
@@ -89,6 +68,15 @@ public class loadingBlue extends LinearOpMode {
     private int stoneStrafeTime = 700;
     private int stoneForwardTime = 200;
     private double correctionDistance = 0;
+
+    // Vuforia Code
+    /* Vuforia is a detection program used to detect the skystones by our team. We find it very useful as
+       it can tell us if a skystone is in fron of our camera, as well as the various values mentioned above.
+       These values, such as the Horizontal Angle Shift, Lateral Shift and Distance from Target allow us to
+       correct our robot to perfectly pick up the skystones as well as efficiently deliver them to the building
+       zone.
+    */
+
     void detectOnce(List<VuforiaTrackable> allTrackables) {
         // check all the trackable targets to see which one (if any) is visible. -- Our only Trackable is Skystone
         Log.i(TAG, "Entering Function detectOnce");
@@ -108,9 +96,6 @@ public class loadingBlue extends LinearOpMode {
                 break;
             }
         }
-
-        //I just kept the following as part of the code, but I don't think we need it (-VJ)
-        // Provide feedback as to where the robot is located (if we know).
         if (targetVisible) {
             // express position (translation) of robot in inches.
             VectorF translation = lastLocation.getTranslation();
@@ -142,12 +127,17 @@ public class loadingBlue extends LinearOpMode {
         }
         telemetry.update();
     }
-
+    /* Move to skystone is our correction program;
+       This program uses the angle shift, lateral shift, and distance from target recorded
+       by Vuforia to move the robot to the correct position.
+    */
 
     public void moveToSkyStone(org.firstinspires.ftc.teamcode.Robot robot) {
+        //Correct Angle
         if (java.lang.Math.abs(location[6]) > 1){
             robot.slowTurn((int)location[6] * (-1));
         }
+        //Correct Lateral Shift
         if (location[2] > 0)
         {
             correctionDistance = (location[2]-2.5)*1.35;
@@ -164,21 +154,14 @@ public class loadingBlue extends LinearOpMode {
                 skystoneLocation--;
             }
         }
-
+        //Move Forward to Target
         robot.moveForwardToPosition(0.6, (java.lang.Math.abs (location[1]) - 4.5));
     }
 
 
     //The Autonomous Program
     public void runOpMode() {
-
-
-        int detect_result;
         int i;
-
-
-        // initVuforia();
-
 
         //Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -239,63 +222,85 @@ public class loadingBlue extends LinearOpMode {
 
         targetsSkyStone.activate();
 
+//BEGINNING AUTONOMOUS CODE
+        /*
+        Our autonomous code for the Loading Side Blue has multiple facets
+            1) First, we begin by moving forward and raising our slides, getting into a position
+            to detect
+            2) We then begin our detection For Loop
+                - This loop goes 5 times, looking for a skystone
+                - If the skystone is found, we run moveToSkystone to get into a position to grab
+                - Next, we cross the bridge, attempt to drop the skystone on top of the foundation
+                  if it has been placed in the triangle area, then return back and get ready for the
+                  next detection
+            3) After we drop the second stone, we park on the middle line
+            4) In total, our team can score 33 points from this Loading zone program
+         */
         Robot.grabStone1();
-
-        //Robot.moveWithSlide1(0.4, 750, 1, 1.8, 1);
         Robot.moveWithSlide1(0.6, 550, 1, 1.8, 1);
+        Robot.dropStone1();
+        Robot.dropStone1();
 
-        //  while (!isStopRequested()) {
-        Robot.dropStone1();
-        Robot.dropStone1();
+        //Our Detection Algorithm
         for (i = skystoneLocation; i < 6; i++) {
             sleep(400);
             detectOnce(allTrackables);
             detectOnce(allTrackables);
+            //Detect Skystone
+
+            //Check if skystone has been detected
             if (location[0] == 1) {
                 skystoneLocation = i;
                 skystonePicked++;
-                //Robot.moveSlideDown(1, 1.8);
                 Robot.moveSlides(-1, 475);
-                moveToSkyStone(Robot);
+                moveToSkyStone(Robot); // Runs correction program to get to the skystone
                 Log.i(TAG, "Detected Stone at Location : " + (skystoneLocation + 1) + " index: " + i);
                 Robot.grabStone1();
                 sleep(400);
                 Robot.moveBackwardForTime(1, 166, false); // move little back
                 Robot.slowTurn(90);
                 sleep(300);
-                Robot.fixOrientation(90);
+                Robot.fixOrientation(90); // Assures that we are straight by using gyroscope
                 Robot.moveForwardForTime(1, 780 + (skystoneLocation + 1) * 275, false);
                 Robot.moveWithSlide1(0.25, 1050, 1, 2.2, 1);
+                // Raises stone up off ground to drop on foundation
                 Robot.dropStone1();
+                // Drops stone
                 Robot.moveWithSlide1(0.2, 925, -1, 1.95, -1);
                 if (skystonePicked == 2) {
+                    // Delivered both skystones, go park
                     Robot.moveRightForTime(1, 50, false);
                     Robot.moveBackwardForTime(1, 300, false);
                     skystoneLocation = 6;
                     break;
                 } else {
-                    // go to detect second skystone
+                    // First skystone delivered, go back to find the second one
                     Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime), false);
                     Robot.moveSlides(1, 550);
                     Robot.slowTurn(-90);
-                    //Robot.moveBackwardForTime(1, 50, false);
                     sleep(350);
                     Robot.fixOrientation(0);
                 }
+            // In the case that Skystone was not detected
             } else {
+                // Stone in front is not skystone, move to next one
                 Robot.slowTurn(-0.5);
                 Robot.moveRightForTime(0.5, stoneStrafeTime, false);
             }
+
             if (i == 5 & skystonePicked != 2) {
-                //Robot.moveSlideDown(1, 1.8);
+                // If you haven't detected 2 stones, try and get 6th stone
                 Robot.moveSlides(-1, 475);
                 Robot.moveRightForTime(0.5, 600, false);
                 Robot.moveLeftForTime(0.25, 330, false);
+
                 if (skystonePicked == 0) {
                     Robot.moveForwardForTime(1, 250, false);
-                } else {
+                }
+                else {
                     Robot.moveForwardForTime(1, 175, false);
                 }
+
                 Robot.slowTurn(-25);
                 Robot.dropStone1();
                 Robot.moveForwardForTime(0.4, 150, false);
@@ -310,9 +315,7 @@ public class loadingBlue extends LinearOpMode {
                 Robot.moveBackwardForTime(1, 450, false);
             }
         }
-
         targetsSkyStone.deactivate();
-
     }
 
 
@@ -325,16 +328,11 @@ public class loadingBlue extends LinearOpMode {
          */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
 
-
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-
-        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
 
 }
