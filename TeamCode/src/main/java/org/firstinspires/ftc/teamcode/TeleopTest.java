@@ -95,13 +95,15 @@ public class TeleopTest extends LinearOpMode{
             if (this.gamepad2.y == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Up");
                 telemetry.update();
-                robot.moveSlideUp(1, 1.25);
+                //robot.moveSlides(-1, 550);
+                robot.moveSlideUp(1, 1);
             }
 
             if (this.gamepad2.a == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down");
                 telemetry.update();
-                robot.moveSlideDown(1, 1.25);
+                //robot.moveSlides(1, 550);
+                robot.moveSlideDown(1, 1);
             }
 
             if (this.gamepad2.dpad_down == true) {

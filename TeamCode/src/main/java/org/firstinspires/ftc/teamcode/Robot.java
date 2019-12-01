@@ -23,6 +23,7 @@ public class Robot extends java.lang.Thread {
     private Telemetry telemetry;
 
     private static final int TICKS_PER_ROTATION = 1440; //Tetrix motor specific
+    private static final int ANDY_TICKS_PER_ROTATION = 1120; //ANDYMArks motor specific
     private static final int WHEEL_DIAMETER = 6; //Wheel diameter in inches
     public String TAG = "FTC";
 
@@ -70,7 +71,7 @@ public class Robot extends java.lang.Thread {
 
     // This function takes input distance in inches and will return Motor ticks needed
     // to travel that distance based on wheel diameter
-    public int DistanceToTick(int distance) {
+    public int DistanceToTick(double distance) {
         // Log.i(TAG, "Enter FUNC: DistanceToTick");
 
         double circumference = WHEEL_DIAMETER * 3.14;
@@ -110,7 +111,7 @@ public class Robot extends java.lang.Thread {
     /*                                                                           */
     /*****************************************************************************/
     // Move forward to specific distance in inches, with power (0 to 1)
-    public void moveForwardToPosition(double power, int distance) {
+    public void moveForwardToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveForwardToPosition Power : " + power + " and distance : " + distance);
         // Reset all encoders
         Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -171,7 +172,7 @@ public class Robot extends java.lang.Thread {
     }
 
     // Move backward to specific distance in inches, with power (0 to 1)
-    public void moveBackwardToPosition(double power, int distance) {
+    public void moveBackwardToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveBackwardToPosition Power : " + power + " and distance : " + distance);
 
         // Reset all encoders
@@ -233,7 +234,7 @@ public class Robot extends java.lang.Thread {
     }
 
     // Move Left to specific distance in inches, with power (0 to 1)
-    public void moveLeftToPosition(double power, int distance) {
+    public void moveLeftToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveLeftToPosition Power : " + power + " and distance : " + distance);
 
         // Reset all encoders
@@ -295,7 +296,7 @@ public class Robot extends java.lang.Thread {
     }
 
     // Move Right to specific distance in inches, with power (0 to 1)
-    public void moveRightToPosition(double power, int distance) {
+    public void moveRightToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveRightToPosition Power : " + power + " and distance : " + distance);
 
         // Reset all encoders
@@ -918,7 +919,7 @@ public class Robot extends java.lang.Thread {
         Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //Find the motor ticks needed to travel the required distance
-        int ticks = (int) (rotation * TICKS_PER_ROTATION);
+        int ticks = (int) (rotation * ANDY_TICKS_PER_ROTATION);
 
         // Set the target position for all motors (in ticks)
         Slide_L.setTargetPosition(ticks);
@@ -964,7 +965,7 @@ public class Robot extends java.lang.Thread {
         Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //Find the motor ticks needed to travel the required distance
-        int ticks = (int) (rotation * TICKS_PER_ROTATION);
+        int ticks = (int) (rotation * ANDY_TICKS_PER_ROTATION);
 
         // Set the target position for all motors (in ticks)
         Slide_L.setTargetPosition((-1) * ticks);
@@ -1122,6 +1123,9 @@ public class Robot extends java.lang.Thread {
         Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         Motor_FL.setPower((direction) * (-1) * power);
         Motor_FR.setPower((direction) * power);
         Motor_BR.setPower((direction) * power);
@@ -1204,16 +1208,28 @@ public class Robot extends java.lang.Thread {
         }
 
     }
+
     public void moveSlides(double power, int time) {
         // Reset all encoders
         long slide_R_Start = Slide_R.getCurrentPosition();
         long slide_L_Start = Slide_L.getCurrentPosition();
 
-            Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+/*
+        if (isTeleOp) {
+            Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        } else {
+            Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+*/
+        Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Set power of all motors
-        Slide_L.setPower((-1) * power);
-        Slide_R.setPower(power);
+        Slide_L.setPower(power);
+        Slide_R.setPower((-1) * power);
 
         try {
             sleep(time);

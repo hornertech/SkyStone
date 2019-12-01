@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
@@ -41,6 +42,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 
 @Autonomous
+
 public class loadingRed extends LinearOpMode {
 
     DigitalChannel digitalTouch;  // Hardware Device Object
@@ -151,7 +153,7 @@ public class loadingRed extends LinearOpMode {
         if (location[2] > 0)
         {
             correctionDistance = (location[2]-2)*1.35;
-            robot.moveRightToPosition(0.5, (int) correctionDistance);
+            robot.moveRightToPosition(0.5, correctionDistance);
             if (location[2] >= 5 ){
                 skystoneLocation--;
                 Log.i(TAG, "SkyStone Index decreased");
@@ -160,14 +162,14 @@ public class loadingRed extends LinearOpMode {
         else if (location[2] < 0)
         {
             correctionDistance = (location[2])*1.6;
-            robot.moveLeftToPosition(0.5, java.lang.Math.abs((int) correctionDistance));
+            robot.moveLeftToPosition(0.5, java.lang.Math.abs(correctionDistance));
             if (location[2] <= -5 ){
                 skystoneLocation++;
                 Log.i(TAG, "SkyStone Index Increased");
             }
         }
 
-        robot.moveForwardToPosition(0.6, (java.lang.Math.abs((int) location[1]) - 3));
+        robot.moveForwardToPosition(0.6, (java.lang.Math.abs((int) location[1]) - 4.5));
 
         if (skystoneLocation == 5){
             skystoneLocation--;
@@ -246,7 +248,7 @@ public class loadingRed extends LinearOpMode {
         targetsSkyStone.activate();
 
         Robot.grabStone1();
-        Robot.moveWithSlide1(0.4, 750, 1, 1.8, 1);
+        Robot.moveWithSlide1(0.6, 550, 1, 1.8, 1);
         //  while (!isStopRequested()) {
         Robot.dropStone1();
 
@@ -258,19 +260,20 @@ public class loadingRed extends LinearOpMode {
             if (location[0] == 1) {
                 skystoneLocation = i;
                 skystonePicked++;
-                Robot.moveSlideDown(1, 1.8);
+                //Robot.moveSlideDown(1, 1.8);
+                Robot.moveSlides(-1, 475);
                 moveToSkyStone(Robot);
                 Log.i(TAG, "Detected Stone at Location : " + (skystoneLocation+1) + " index : " + i);
                 Robot.grabStone1();
-                sleep(200);
+                sleep(400);
                 Robot.moveBackwardForTime(1, 125, false); // move little back
                 Robot.slowTurn(-90);
                 sleep(300);
                 Robot.fixOrientation(-90);
                 Robot.moveForwardForTime(1, 810 + (skystoneLocation + 1)*275, false);
-                Robot.moveWithSlide1(0.16, 1200,1, 2.2, 1);
+                Robot.moveWithSlide1(0.25, 1050,1, 2.2, 1);
                 Robot.dropStone1();
-                Robot.moveWithSlide(1, 10,-1, 1.95, -1);
+                Robot.moveWithSlide1(0.2, 925, -1, 1.95, -1);
                 if (skystonePicked == 2)
                 {
                     Robot.moveLeftForTime(1, 50, false);
@@ -281,7 +284,7 @@ public class loadingRed extends LinearOpMode {
                 else {
                     // go to detect second skystone
                     Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime),false);
-                    Robot.moveSlideUp(1, 1.8);
+                    Robot.moveSlides(1, 550);
                     Robot.slowTurn(90);
                     sleep(300);
                     Robot.fixOrientation(0);
@@ -294,7 +297,7 @@ public class loadingRed extends LinearOpMode {
                 Robot.moveLeftForTime(0.5,stoneStrafeTime, false );
             }
             if(i == 5 & skystonePicked != 2){
-                Robot.moveSlideDown(1, 1.8);
+                Robot.moveSlides(-1, 475);
                 Robot.moveLeftForTime(0.5,400, false);
                 Robot.moveRightForTime(0.25, 330, false);
                 if (skystonePicked == 0) {
@@ -302,7 +305,7 @@ public class loadingRed extends LinearOpMode {
                 }else {
                     Robot.moveForwardForTime(1, 150, false);
                 }
-
+                Robot.dropStone1();
                 Robot.slowTurn(20);
                 Robot.moveForwardForTime(0.8, 160, false);
                 Robot.grabStone1();
