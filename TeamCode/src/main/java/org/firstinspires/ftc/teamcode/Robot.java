@@ -62,6 +62,57 @@ public class Robot extends java.lang.Thread {
         initDevices();
     }
 
+    private void initDeviceCore() throws Exception {
+
+        telemetry.addData("Please wait", "In function init devices");
+        telemetry.update();
+
+        //Wheels
+        Motor_FL = hardwareMap.get(DcMotor.class, "motor_br");
+        Motor_FR = hardwareMap.get(DcMotor.class, "motor_bl");
+        Motor_BR = hardwareMap.get(DcMotor.class, "motor_fr");
+        Motor_BL = hardwareMap.get(DcMotor.class, "motor_fl");
+
+        Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
+        Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
+
+        Clamp_L = hardwareMap.get(DcMotor.class, "clamp_l");
+        Clamp_R = hardwareMap.get(DcMotor.class, "clamp_r");
+
+        pincher = hardwareMap.get(Servo.class, "pincher");
+
+        BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
+        parametersIMU.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parametersIMU);
+
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Log.i(TAG, "Start Orientation First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle );
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+    }
+
+
+    private void initDevices() {
+        mRuntime = new ElapsedTime();
+        mRuntime.reset();
+
+        try {
+            initDeviceCore();
+        } catch (Exception e) {
+            telemetry.addData("Exception", "In function init devices" + e);
+            telemetry.update();
+            try {
+                sleep(10000);
+            } catch (Exception e1) {
+            }
+
+        }
+
+    }
+
     public void pause(int milliSec) {
         try {
             sleep(milliSec);
@@ -849,6 +900,7 @@ public class Robot extends java.lang.Thread {
         Clamp_L.setPower(0);
         Clamp_R.setPower(0);
     }
+
     public void slowTurn(double angle) {
         Log.i(TAG, "Enter Function slowTurn Angle: "+ angle);
 
@@ -890,27 +942,7 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function slowTurn");
     }
 
-    //CLEANUP: remove this and use moveLeft/RightForTime
-    public void wall_align(double power, int time) {
-        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        Motor_FL.setPower(-1 * power);
-        Motor_FR.setPower(-1 * power);
-        Motor_BR.setPower(power);
-        Motor_BL.setPower(power);
-        try {
-            sleep(time);
-        } catch (Exception e) {
-        }
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-    }
-
+/*
     public void moveSlideUp(double power, double rotation)
     {
         Log.i(TAG, "Enter Function moveSlideUp Power: "+ power + " Rotation :" + rotation);
@@ -1002,118 +1034,21 @@ public class Robot extends java.lang.Thread {
         }
         Log.i(TAG, "Exit Function moveSlideDown ");
     }
-
+*/
     public void grabStone() {
-        Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
-        pincher.setPosition(0.72);
-        Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
-    }
-
-
-
-    public void dropStone() {
-        Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
-        pincher.setPosition(0.7325);
-        Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
-     }
-
-    public void grabStone1() {
         Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
         pincher.setPosition(0.8);
         Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
 
-    public void dropStone1() {
+    public void dropStone() {
         Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
         pincher.setPosition(1);
         Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
     }
-    public void setPosition(double position) {
-        Log.i(TAG, "Enter Function setPosition Start Position:" + pincher.getPosition());
-       pincher.setPosition(position);
-        Log.i(TAG, "Exit Function setPosition End Position:" + pincher.getPosition());
-    }
 
-    public void moveWithSlide(double power, int distance,int direction, double slideRotation, int slideDirection) {
-        Log.i(TAG, "Enter Function: moveForwardToPosition Power : " + power + " and distance : " + distance);
-        // Reset all encoders
-        Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Motor_FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Motor_BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Motor_BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Find the motor ticks needed to travel the required distance
-        int ticks = DistanceToTick(distance);
-        //Find the motor ticks needed to travel the required distance
-        int slideTicks = (int) (slideRotation * TICKS_PER_ROTATION);
-
-        // Set the target position for all motors (in ticks)
-        Motor_FL.setTargetPosition((direction) * (-1) * ticks);
-        Motor_FR.setTargetPosition((direction) * ticks);
-        Motor_BR.setTargetPosition((direction) * ticks);
-        Motor_BL.setTargetPosition((direction) * (-1) * ticks);
-
-        // Set the target position for all motors (in ticks)
-        Slide_L.setTargetPosition((slideDirection) * slideTicks);
-        Slide_R.setTargetPosition((slideDirection) * (-1) * slideTicks);
-
-        //Set power of all motors
-        Motor_FL.setPower(power);
-        Motor_FR.setPower(power);
-        Motor_BR.setPower(power);
-        Motor_BL.setPower(power);
-
-        //Set power of all motors
-        Slide_R.setPower(1);
-        Slide_L.setPower(1);
-
-        //Set Motors to RUN_TO_POSITION
-        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //Set Motors to RUN_TO_POSITION
-        Motor_FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Motor_FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Motor_BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Motor_BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //Wait for them to reach to the position
-        //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
-        while (Motor_FL.isBusy() || Slide_L.isBusy()) {
-            if (DEBUG_DEBUG) {
-                Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
-                Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
-                Log.i(TAG, "Actual Ticks Motor2 : " + Motor_BR.getCurrentPosition());
-                Log.i(TAG, "Actual Ticks Motor3 : " + Motor_BL.getCurrentPosition());
-            }
-            //Waiting for Robot to travel the distance
-            telemetry.addData("Backward", "Moving");
-            telemetry.update();
-        }
-
-
-        //Reached the distance, so stop the motors
-        Motor_FL.setPower(0);
-        Motor_FR.setPower(0);
-        Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
-        Slide_R.setPower(0);
-        Slide_L.setPower(0);
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "TICKS needed : " + ticks);
-            Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
-            Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
-            Log.i(TAG, "Actual Ticks Motor2 : " + Motor_BR.getCurrentPosition());
-            Log.i(TAG, "Actual Ticks Motor3 : " + Motor_BL.getCurrentPosition());
-            Log.i(TAG, "Exit Function: moveForwardToPosition");
-        }
-    }
-
-    public void moveWithSlide1(double power, int time,int direction, double slideRotation, int slideDirection) {
+     public void moveWithSlide(double power, int time,int direction, double slidePower, int slideDirection) {
         Log.i(TAG, "Enter Function: moveWithSlide1 ");
         // Reset all encoders
         Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -1131,8 +1066,8 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPower((direction) * power);
         Motor_BL.setPower((direction) * (-1) * power);
 
-        Slide_L.setPower((slideDirection) * 1);
-        Slide_R.setPower((slideDirection) * (-1));
+        Slide_L.setPower((slideDirection) * slidePower);
+        Slide_R.setPower((slideDirection) * (-1) * slidePower);
 
         try {
             sleep(time);
@@ -1158,73 +1093,24 @@ public class Robot extends java.lang.Thread {
 
     }
 
-    private void initDeviceCore() throws Exception {
-
-        telemetry.addData("Please wait", "In function init devices");
-        telemetry.update();
-
-        //Wheels
-        Motor_FL = hardwareMap.get(DcMotor.class, "motor_br");
-        Motor_FR = hardwareMap.get(DcMotor.class, "motor_bl");
-        Motor_BR = hardwareMap.get(DcMotor.class, "motor_fr");
-        Motor_BL = hardwareMap.get(DcMotor.class, "motor_fl");
-
-        Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
-        Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
-
-        Clamp_L = hardwareMap.get(DcMotor.class, "clamp_l");
-        Clamp_R = hardwareMap.get(DcMotor.class, "clamp_r");
-
-        pincher = hardwareMap.get(Servo.class, "pincher");
-
-        BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
-        parametersIMU.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parametersIMU);
-
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        Log.i(TAG, "Start Orientation First : "+ angles.firstAngle + "Second: " + angles.secondAngle + "Third: " + angles.thirdAngle );
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-    }
 
 
-    private void initDevices() {
-        mRuntime = new ElapsedTime();
-        mRuntime.reset();
-
-        try {
-            initDeviceCore();
-        } catch (Exception e) {
-            telemetry.addData("Exception", "In function init devices" + e);
-            telemetry.update();
-            try {
-                sleep(10000);
-            } catch (Exception e1) {
-            }
-
-        }
-
-    }
-
-    public void moveSlides(double power, int time) {
+    public void moveSlides(double power, int time, boolean teleop) {
         // Reset all encoders
         long slide_R_Start = Slide_R.getCurrentPosition();
         long slide_L_Start = Slide_L.getCurrentPosition();
 
         Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-/*
-        if (isTeleOp) {
+
+        if (teleop) {
             Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         } else {
             Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-*/
+
         Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Set power of all motors

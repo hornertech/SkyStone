@@ -82,40 +82,26 @@ public class TeleopTest extends LinearOpMode{
             if (this.gamepad2.x == true) {
                 telemetry.addData("Robot-Testing ", "grabStone");
                 telemetry.update();
-                robot.grabStone1();
+                robot.grabStone();
             }
 
             if (this.gamepad2.b == true) {
                 telemetry.addData("Robot-Testing ", "dropStone");
                 telemetry.update();
-                robot.dropStone1();
+                robot.dropStone();
             }
 
             // Slide
-            if (this.gamepad2.y == true) {
-                telemetry.addData("Robot-Testing ", "Slide-Up");
-                telemetry.update();
-                //robot.moveSlides(-1, 550);
-                robot.moveSlideUp(1, 1);
-            }
-
-            if (this.gamepad2.a == true) {
-                telemetry.addData("Robot-Testing ", "Slide-Down");
-                telemetry.update();
-                //robot.moveSlides(1, 550);
-                robot.moveSlideDown(1, 1);
-            }
-
             if (this.gamepad2.dpad_down == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down-slow");
                 telemetry.update();
-                robot.moveSlideDown(1, 0.2);
+                robot.moveSlides(0.5, 10, true);
             }
 
             if (this.gamepad2.dpad_up == true) {
                 telemetry.addData("Robot-Testing ", "Slide-Down-up");
                 telemetry.update();
-                robot.moveSlideUp(1, 0.2);
+                robot.moveSlides(-0.5, 10, true);
             }
 
             if (this.gamepad1.b == true){
@@ -130,11 +116,11 @@ public class TeleopTest extends LinearOpMode{
                 robot.ClampDown(50);
             }
             if (this.gamepad2.right_stick_y > 0.5) {
-                robot.moveSlides(1, 10);
+                robot.moveSlides(1, 10, true);
             }
 
             if (this.gamepad2.right_stick_y < -0.5) {
-                robot.moveSlides(-1, 10);
+                robot.moveSlides(-1, 10, true);
             }
 
         };

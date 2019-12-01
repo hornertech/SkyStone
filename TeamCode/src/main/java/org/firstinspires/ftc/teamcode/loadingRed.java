@@ -266,10 +266,10 @@ public class loadingRed extends LinearOpMode {
             3) After we drop the second stone, we park on the middle line
             4) In total, our team can score 33 points from this Loading zone program
          */
-        Robot.grabStone1();
-        Robot.moveWithSlide1(0.6, 550, 1, 1.8, 1);
-        Robot.dropStone1();
-        Robot.dropStone1();
+        Robot.grabStone();
+        Robot.moveWithSlide(0.6, 550, 1, 1, 1);
+        Robot.dropStone();
+        Robot.dropStone();
 
         // Our Detection Algorithm
         for (i = skystoneLocation; i < 6; i++) {
@@ -282,21 +282,21 @@ public class loadingRed extends LinearOpMode {
             if (location[0] == 1) {
                 skystoneLocation = i;
                 skystonePicked++;
-                Robot.moveSlides(-1, 475);
+                Robot.moveSlides(-1, 475, false);
                 moveToSkyStone(Robot); // Runs correction program to get to the skystone
                 Log.i(TAG, "Detected Stone at Location : " + (skystoneLocation+1) + " index : " + i);
-                Robot.grabStone1();
+                Robot.grabStone();
                 sleep(400);
                 Robot.moveBackwardForTime(1, 125, false); // move little back
                 Robot.slowTurn(-90);
                 sleep(300);
                 Robot.fixOrientation(-90); // Assures that we are straight by using gyroscope
                 Robot.moveForwardForTime(1, 810 + (skystoneLocation + 1)*275, false);
-                Robot.moveWithSlide1(0.25, 1050,1, 2.2, 1);
+                Robot.moveWithSlide(0.25, 1050,1, 1, 1);
                 // Raises stone up off ground to drop on foundation
-                Robot.dropStone1();
+                Robot.dropStone();
                 // Drops stone
-                Robot.moveWithSlide1(0.2, 925, -1, 1.95, -1);
+                Robot.moveWithSlide(0.2, 925, -1, 1, -1);
                 if (skystonePicked == 2)
                 {
                     // Delivered both skystones, go park
@@ -308,7 +308,7 @@ public class loadingRed extends LinearOpMode {
                 else {
                     // First skystone delivered, go back to find the second one
                     Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime),false);
-                    Robot.moveSlides(1, 550);
+                    Robot.moveSlides(1, 550, false);
                     Robot.slowTurn(90);
                     sleep(300);
                     Robot.fixOrientation(0);
@@ -323,7 +323,7 @@ public class loadingRed extends LinearOpMode {
 
             if(i == 5 & skystonePicked != 2){
                 // If you haven't detected 2 stones, try and get 6th stone
-                Robot.moveSlides(-1, 475);
+                Robot.moveSlides(-1, 475, false);
                 Robot.moveLeftForTime(0.5,400, false);
                 Robot.moveRightForTime(0.25, 330, false);
 
@@ -334,17 +334,17 @@ public class loadingRed extends LinearOpMode {
                     Robot.moveForwardForTime(1, 150, false);
                 }
 
-                Robot.dropStone1();
+                Robot.dropStone();
                 Robot.slowTurn(20);
                 Robot.moveForwardForTime(0.8, 160, false);
-                Robot.grabStone1();
+                Robot.grabStone();
                 sleep(250);
                 Robot.moveBackwardForTime(1, 150, false);
                 Robot.slowTurn(-115);
                 sleep(300);
                 Robot.fixOrientation(-90);
                 Robot.moveForwardForTime(1, 2390, false);
-                Robot.dropStone1();
+                Robot.dropStone();
                 Robot.moveBackwardForTime(1, 450, false);
             }
         }
