@@ -55,6 +55,8 @@ public class Robot extends java.lang.Thread {
 
     public long movementFactor = 1;
     public double turnFactor = 7.2;
+    public double leftStrafeFactor = 1.31;
+    public double rightStrafeFactor = 1.31;
 
     Robot(HardwareMap map, Telemetry tel) {
         hardwareMap = map;
@@ -83,6 +85,7 @@ public class Robot extends java.lang.Thread {
 
         BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
         parametersIMU.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parametersIMU.calibrationDataFile = "BNO055IMUCalibration.json";
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersIMU);
@@ -296,7 +299,7 @@ public class Robot extends java.lang.Thread {
 
         //Find the motor ticks needed to travel the required distance
         int ticks = DistanceToTick(distance);
-
+        ticks = (int) (ticks * leftStrafeFactor);
         // Set the target position for all motors (in ticks)
         Motor_FL.setTargetPosition(ticks);
         Motor_FR.setTargetPosition(ticks);
@@ -358,7 +361,7 @@ public class Robot extends java.lang.Thread {
 
         //Find the motor ticks needed to travel the required distance
         int ticks = DistanceToTick(distance);
-
+        ticks = (int) (ticks * rightStrafeFactor);
         // Set the target position for all motors (in ticks)
         Motor_FL.setTargetPosition((-1) * ticks);
         Motor_FR.setTargetPosition((-1) * ticks);
@@ -1111,9 +1114,6 @@ public class Robot extends java.lang.Thread {
             Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //Set power of all motors
         Slide_L.setPower(power);
         Slide_R.setPower((-1) * power);
 

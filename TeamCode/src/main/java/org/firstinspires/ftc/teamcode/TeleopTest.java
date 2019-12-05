@@ -107,13 +107,13 @@ public class TeleopTest extends LinearOpMode{
             if (this.gamepad1.b == true){
                 telemetry.addData("Clamp", "Up");
                 telemetry.update();
-                robot.ClampUp(50);
+                robot.ClampUp(25);
             }
 
             if (this.gamepad1.x == true){
                 telemetry.addData("Clamp", "Down");
                 telemetry.update();
-                robot.ClampDown(50);
+                robot.ClampDown(25);
             }
             if (this.gamepad2.right_stick_y > 0.5) {
                 robot.moveSlides(1, 10, true);

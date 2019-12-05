@@ -66,7 +66,7 @@ public class loadingBlue extends LinearOpMode {
     private int skystonePicked = 0;
     private int skystoneLocation = 0;
     private int stoneStrafeTime = 700;
-    private int stoneForwardTime = 200;
+    private int stoneForwardTime = 255;
     private double correctionDistance = 0;
 
     // Vuforia Code
@@ -133,29 +133,40 @@ public class loadingBlue extends LinearOpMode {
     */
 
     public void moveToSkyStone(org.firstinspires.ftc.teamcode.Robot robot) {
-        //Correct Angle
-        if (java.lang.Math.abs(location[6]) > 1){
-            robot.slowTurn((int)location[6] * (-1));
-        }
+
         //Correct Lateral Shift
+
         if (location[2] > 0)
         {
-            correctionDistance = (location[2]-2.5)*1.35;
+            correctionDistance = (location[2]);
             robot.moveRightToPosition(0.5, correctionDistance);
-            if (location[2] >= 5 ){
+            if (location[2] >= 2.5 ){
                 skystoneLocation++;
             }
         }
         else if (location[2] < 0)
         {
-            correctionDistance = (location[2])*1.6;
+            correctionDistance = (location[2]);
             robot.moveLeftToPosition(0.5, java.lang.Math.abs(correctionDistance));
             if (location[2] <= -5 ){
                 skystoneLocation--;
             }
         }
+/*
+        //Correct Angle
+        if (java.lang.Math.abs(location[6]) > 1){
+            robot.slowTurn((int)location[6] * (-1));
+        }
+*/
+        sleep(450);
+        robot.fixOrientation(0);
+
         //Move Forward to Target
         robot.moveForwardToPosition(0.6, (java.lang.Math.abs (location[1]) - 4.5));
+
+        if (skystoneLocation == 5){
+            skystoneLocation--;
+        }
     }
 
 
@@ -186,7 +197,7 @@ public class loadingBlue extends LinearOpMode {
         // Next, translate the camera lens to where it is on the robot.
         final float CAMERA_FORWARD_DISPLACEMENT = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
         final float CAMERA_VERTICAL_DISPLACEMENT = 5.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_LEFT_DISPLACEMENT = 1.5f * mmPerInch;     // eg: Camera is ON the robot's center line
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
@@ -237,10 +248,9 @@ public class loadingBlue extends LinearOpMode {
             4) In total, our team can score 33 points from this Loading zone program
          */
         Robot.grabStone();
-        Robot.moveWithSlide(0.6, 550, 1, 1, 1);
+        Robot.moveWithSlide(0.635, 500, 1, 1, 1);
         Robot.dropStone();
         Robot.dropStone();
-
         //Our Detection Algorithm
         for (i = skystoneLocation; i < 6; i++) {
             sleep(400);
@@ -256,26 +266,31 @@ public class loadingBlue extends LinearOpMode {
                 moveToSkyStone(Robot); // Runs correction program to get to the skystone
                 Log.i(TAG, "Detected Stone at Location : " + (skystoneLocation + 1) + " index: " + i);
                 Robot.grabStone();
-                sleep(400);
+                sleep(600);
                 Robot.moveBackwardForTime(1, 166, false); // move little back
                 Robot.slowTurn(90);
-                sleep(300);
+                sleep(500);
                 Robot.fixOrientation(90); // Assures that we are straight by using gyroscope
-                Robot.moveForwardForTime(1, 780 + (skystoneLocation + 1) * 275, false);
-                Robot.moveWithSlide(0.25, 1050, 1, 1, 1);
+                Robot.moveForwardForTime(1, 900 + (skystoneLocation + 1) * stoneForwardTime, false);
+
+                //Robot.moveWithSlide(0.2, 1050, 1, 1, 1);
+
                 // Raises stone up off ground to drop on foundation
                 Robot.dropStone();
                 // Drops stone
-                Robot.moveWithSlide(0.2, 925, -1, 1, -1);
+               // Robot.moveWithSlide(0.2, 925, -1, 1, -1);
+
                 if (skystonePicked == 2) {
                     // Delivered both skystones, go park
-                    Robot.moveRightForTime(1, 50, false);
-                    Robot.moveBackwardForTime(1, 300, false);
+                    Robot.moveRightForTime(1, 75, false);
+                    sleep(450);
+                    Robot.fixOrientation(90);
+                    Robot.moveBackwardForTime(1, 400, false);
                     skystoneLocation = 6;
                     break;
                 } else {
                     // First skystone delivered, go back to find the second one
-                    Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 1) * stoneForwardTime), false);
+                    Robot.moveBackwardForTime(1, 900 + ((skystoneLocation + 2) * stoneForwardTime), false);
                     Robot.moveSlides(1, 550, false);
                     Robot.slowTurn(-90);
                     sleep(350);
@@ -298,16 +313,16 @@ public class loadingBlue extends LinearOpMode {
                     Robot.moveForwardForTime(1, 250, false);
                 }
                 else {
-                    Robot.moveForwardForTime(1, 175, false);
+                    Robot.moveForwardForTime(1, 150, false);
                 }
 
-                Robot.slowTurn(-25);
+                Robot.slowTurn(-40);
                 Robot.dropStone();
                 Robot.moveForwardForTime(0.4, 150, false);
                 Robot.grabStone();
                 sleep(250);
                 Robot.moveBackwardForTime(1, 150, false);
-                Robot.slowTurn(112.5);
+                Robot.slowTurn(128);
                 sleep(500);
                 Robot.fixOrientation(90);
                 Robot.moveForwardForTime(1, 2390, false);
