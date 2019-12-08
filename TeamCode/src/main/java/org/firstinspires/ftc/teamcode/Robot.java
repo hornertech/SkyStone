@@ -1099,6 +1099,7 @@ public class Robot extends java.lang.Thread {
 
 
     public void moveSlides(double power, int time, boolean teleop) {
+        Log.i(TAG, "Enter Function: moveSlides");
         // Reset all encoders
         long slide_R_Start = Slide_R.getCurrentPosition();
         long slide_L_Start = Slide_L.getCurrentPosition();
@@ -1128,9 +1129,6 @@ public class Robot extends java.lang.Thread {
 
         long Slide_R_End = Slide_R.getCurrentPosition();
         long Slide_L_End = Slide_L.getCurrentPosition();
-        Log.i(TAG, "Exit Function: moveForwardForTime");
+        Log.i(TAG, "Exit Function: moveSlides");
     }
-
-
-
 }

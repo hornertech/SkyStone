@@ -44,7 +44,7 @@ public class buildingBlue extends LinearOpMode {
         Robot.moveBackwardForTime(0.5, 355, false);
         Robot.moveLeftForTime(0.6, 500, false);
         sleep(500);
-        Robot.fixOrientation(0);
+        Robot.fixOrientation(-1);
         Robot.moveLeftForTime(0.6, 1600, false);
         // Get right up next to the Foundation
         Robot.ClampDown(200);

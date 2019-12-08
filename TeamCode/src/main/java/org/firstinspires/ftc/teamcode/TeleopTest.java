@@ -116,11 +116,11 @@ public class TeleopTest extends LinearOpMode{
                 robot.ClampDown(25);
             }
             if (this.gamepad2.right_stick_y > 0.5) {
-                robot.moveSlides(1, 10, true);
+                robot.moveSlides(-1, 10, true);
             }
 
             if (this.gamepad2.right_stick_y < -0.5) {
-                robot.moveSlides(-1, 10, true);
+                robot.moveSlides(1, 10, true);
             }
 
         };
