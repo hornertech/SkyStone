@@ -41,24 +41,29 @@ public class buildingBlue extends LinearOpMode {
          */
 
 
-        Robot.moveBackwardForTime(0.5, 355, false);
-        Robot.moveLeftForTime(0.6, 500, false);
-        sleep(500);
-        Robot.fixOrientation(-1);
-        Robot.moveLeftForTime(0.6, 1600, false);
+        Robot.moveBackwardForTime(0.5, 385, false);
+        Robot.moveLeftForTime(0.6, 2100, false);
+       // sleep(500);
+        //Robot.fixOrientation(-1);
+       // Robot.moveLeftForTime(0.6, 1600, false);
         // Get right up next to the Foundation
         Robot.ClampDown(200);
         sleep(1000);
-        Robot.moveRightForTime(1, 2250, false);
-        sleep(300);
-        Robot.fixOrientation(10);
-        Robot.moveRightForTime(1, 1900, false);
+        Robot.moveRightForTime(1, 1000, false);
+        //sleep(300);
+        //Robot.fixOrientation(10);
+        Robot.slowTurn(-50);
+        Robot.moveRightForTime(1, 1000, false);
+        Robot.slowTurn(-50);
+        Robot.moveRightForTime(1, 1000, false);
+        Robot.slowTurn(-50);
+        Robot.moveRightForTime(1, 1100, false);
         // Pull foundation in to the side wall
         Robot.ClampUp(120);
         Robot.moveRightForTime(0.3, 3000, false);
         // Align with side wall
         Robot.moveBackwardForTime(0.3, 2000, false);
-        Robot.moveForwardForTime(0.7, 1800, false);
+        Robot.moveForwardForTime(0.7, 2000, false);
         Robot.moveLeftForTime(1, 800, false);
         // Get in front of Foundation
         Robot.moveBackwardForTime(0.3, 1900, false);

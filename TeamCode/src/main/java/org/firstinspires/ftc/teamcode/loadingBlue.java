@@ -320,6 +320,9 @@ public class loadingBlue extends LinearOpMode {
                 if(secondSkyStoneLocation == -1 || secondSkyStoneLocation == 4 || secondSkyStoneLocation > 5){
                     Robot.moveSlides(-1, 475, false);
                     Robot.moveLeftForTime(0.5, 300, false);
+                    Robot.grabStone();
+                    Robot.dropStone();
+                    sleep(500);
                     Robot.moveForwardForTime(1, 150, false);
                     Robot.grabStone();
                     sleep(500);
@@ -334,6 +337,9 @@ public class loadingBlue extends LinearOpMode {
                 else if(secondSkyStoneLocation == 3){
                     Robot.moveSlides(-1, 475, false);
                     Robot.moveLeftForTime(1, 420, false);
+                    Robot.grabStone();
+                    Robot.dropStone();
+                    sleep(500);
                     Robot.moveForwardForTime(1, 150, false);
                     Robot.grabStone();
                     sleep(500);
