@@ -37,11 +37,11 @@ public class TeleopTest extends LinearOpMode{
             /********** GamePad 1 ****************/
             //Turning
             if (this.gamepad1.left_stick_x > 0.5) {
-                robot.turnForTime(0.6, 10, false, -1 );
+                robot.turnForTime(0.6, 10, false, 1 );
             }
 
             if (this.gamepad1.left_stick_x < -0.5) {
-                robot.turnForTime(0.6, 10, false, 1 );
+                robot.turnForTime(0.6, 10, false, -1 );
             }
 
             // Moving
@@ -83,12 +83,14 @@ public class TeleopTest extends LinearOpMode{
                 telemetry.addData("Robot-Testing ", "grabStone");
                 telemetry.update();
                 robot.grabStone();
+                //robot.moveForwardToPosition(0.5, 12);
             }
 
             if (this.gamepad2.b == true) {
                 telemetry.addData("Robot-Testing ", "dropStone");
                 telemetry.update();
                 robot.dropStone();
+                //robot.moveBackwardToPosition(0.5, 12);
             }
 
             // Slide
