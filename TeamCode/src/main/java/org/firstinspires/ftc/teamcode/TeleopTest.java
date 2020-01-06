@@ -77,6 +77,13 @@ public class TeleopTest extends LinearOpMode{
                 robot.moveB(0.5, 1);
             }
 
+            if(this.gamepad1.y == true) {
+                robot.rotate(90, 0.355);
+            }
+            if(this.gamepad1.a == true) {
+                robot.turnForTime(0.5, 650, false, 1);
+            }
+
             /****************** GamePad 2 **************/
             // Pincher
             if (this.gamepad2.x == true) {
