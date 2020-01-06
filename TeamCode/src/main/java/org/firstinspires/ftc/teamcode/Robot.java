@@ -53,17 +53,19 @@ public class Robot extends java.lang.Thread {
     BNO055IMU imu;
 
     // State used for updating telemetry
-    Orientation angles;
-    PIDController           pidRotate, pidDrive;
+    Orientation     angles;
+    PIDController   pidRotate, pidDrive;
+    Orientation     lastAngles = new Orientation();
+    double          globalAngle, correction;
 
-    public boolean isTeleOp = true;
-    public boolean DEBUG_DEBUG = false;
-    public boolean DEBUG_INFO = false;
+    public boolean isTeleOp     = true;
+    public boolean DEBUG_DEBUG  = false;
+    public boolean DEBUG_INFO   = false;
 
-    public long movementFactor = 1;
-    public double turnFactor = 7.2;
-    public double leftStrafeFactor = 1.31;
-    public double rightStrafeFactor = 1.31;
+    public long     movementFactor      = 1;
+    public double   turnFactor          = 7.2;
+    public double   leftStrafeFactor    = 1.31;
+    public double   rightStrafeFactor   = 1.31;
 
     Robot(HardwareMap map, Telemetry tel) {
         hardwareMap = map;
@@ -454,24 +456,13 @@ public class Robot extends java.lang.Thread {
     /*****************************************************************************/
     // Move forward for specific time in milliseconds, with power (0 to 1)
     public void moveBackwardForTime(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveBackwardForTime Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = Motor_FL.getCurrentPosition();
-        long motor1_start_position = Motor_FR.getCurrentPosition();
-        long motor2_start_position = Motor_BR.getCurrentPosition();
-        long motor3_start_position = Motor_BL.getCurrentPosition();
+        Log.i(TAG, "Enter Function: moveBackwardForTime Power : " + power + " and time : " + time);
 
-        if (speed == true) {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         //Set power of all motors
         Motor_FL.setPower((-1) * power);
@@ -490,40 +481,16 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
 
-        long motor0_end_position = Motor_FL.getCurrentPosition();
-        long motor1_end_position = Motor_FR.getCurrentPosition();
-        long motor2_end_position = Motor_BR.getCurrentPosition();
-        long motor3_end_position = Motor_BL.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-
-        }
         Log.i(TAG, "Exit Function: moveBackwardForTime");
     }
 
     public void moveForwardForTime(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveForwardForTime Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = Motor_FL.getCurrentPosition();
-        long motor1_start_position = Motor_FR.getCurrentPosition();
-        long motor2_start_position = Motor_BR.getCurrentPosition();
-        long motor3_start_position = Motor_BL.getCurrentPosition();
+        Log.i(TAG, "Enter Function: moveForwardForTime Power : " + power + " and time : " + time);
 
-        if (speed == true) {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Set power of all motors
         Motor_FL.setPower(power);
@@ -542,104 +509,49 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
 
-        long motor0_end_position = Motor_FL.getCurrentPosition();
-        long motor1_end_position = Motor_FR.getCurrentPosition();
-        long motor2_end_position = Motor_BR.getCurrentPosition();
-        long motor3_end_position = Motor_BL.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-
-        }
         Log.i(TAG, "Exit Function: moveForwardForTime");
     }
 
     public void moveLeftForTime(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveLeftForTime Power : " + power + " and time : " + time + "Speed : " + speed);
-        // Reset all encoders
-        long motor0_start_position = Motor_FL.getCurrentPosition();
-        long motor1_start_position = Motor_FR.getCurrentPosition();
-        long motor2_start_position = Motor_BR.getCurrentPosition();
-        long motor3_start_position = Motor_BL.getCurrentPosition();
+        Log.i(TAG, "Enter Function: moveLeftForTime Power : " + power + " and time : " + time);
 
-        if (speed == true) {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            //Set power of all motors
-            Motor_FL.setPower((-1) * (0.92) * power);
-            Motor_FR.setPower((-1) * (0.92) * power);
-            Motor_BR.setPower(power);
-            Motor_BL.setPower(power);
-        } else {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            //Set power of all motors
-            Motor_FL.setPower((-1) * power);
-            Motor_FR.setPower((-1) * power);
-            Motor_BR.setPower(power);
-            Motor_BL.setPower(power);
-        }
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //Set power of all motors
+        Motor_FL.setPower((-1) * power);
+        Motor_FR.setPower((-1) * power);
+        Motor_BR.setPower(power);
+        Motor_BL.setPower(power);
+
 
         try {
             sleep(time);
         } catch (Exception e) {
         }
+
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
 
-        long motor0_end_position = Motor_FL.getCurrentPosition();
-        long motor1_end_position = Motor_FR.getCurrentPosition();
-        long motor2_end_position = Motor_BR.getCurrentPosition();
-        long motor3_end_position = Motor_BL.getCurrentPosition();
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-
-        }
         Log.i(TAG, "Exit Function: moveLeftForTime");
     }
 
     public void moveRightForTime(double power, int time, boolean speed) {
-        Log.i(TAG, "Enter Function: moveRightForTime Power : " + power + " and time : " + time + "Speed : " + speed);
+        Log.i(TAG, "Enter Function: moveRightForTime Power : " + power + " and time : " + time);
 
-        long motor0_start_position = Motor_FL.getCurrentPosition();
-        long motor1_start_position = Motor_FR.getCurrentPosition();
-        long motor2_start_position = Motor_BR.getCurrentPosition();
-        long motor3_start_position = Motor_BL.getCurrentPosition();
-
-        if (speed == true) {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            //Set power of all motors
-            Motor_FL.setPower((0.92) * power);
-            Motor_FR.setPower((0.92) * power);
-            Motor_BR.setPower((-1) * power);
-            Motor_BL.setPower((-1) * power);
-        } else {
-            Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            //Set power of all motors
-            Motor_FL.setPower(power);
-            Motor_FR.setPower(power );
-            Motor_BR.setPower((-1) * power);
-            Motor_BL.setPower((-1) * power);
-        }
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //Set power of all motors
+        Motor_FL.setPower(power);
+        Motor_FR.setPower(power);
+        Motor_BR.setPower((-1) * power);
+        Motor_BL.setPower((-1) * power);
 
         try {
             sleep(time);
@@ -652,18 +564,6 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPower(0);
         Motor_BL.setPower(0);
 
-        long motor0_end_position = Motor_FL.getCurrentPosition();
-        long motor1_end_position = Motor_FR.getCurrentPosition();
-        long motor2_end_position = Motor_BR.getCurrentPosition();
-        long motor3_end_position = Motor_BL.getCurrentPosition();
-
-        if (DEBUG_INFO ) {
-            Log.i(TAG, "Ticks Moved Motor0 : " + (motor0_end_position - motor0_start_position));
-            Log.i(TAG, "Ticks Moved Motor1 : " + (motor1_end_position - motor1_start_position));
-            Log.i(TAG, "Ticks Moved Motor2 : " + (motor2_end_position - motor2_start_position));
-            Log.i(TAG, "Ticks Moved Motor3 : " + (motor3_end_position - motor3_start_position));
-
-        }
         Log.i(TAG, "Exit Function: moveRightForTime");
     }
 
@@ -836,99 +736,6 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function slowTurn");
     }
 
-/*
-    public void moveSlideUp(double power, double rotation)
-    {
-        Log.i(TAG, "Enter Function moveSlideUp Power: "+ power + " Rotation :" + rotation);
-        // Reset all encoders
-        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Find the motor ticks needed to travel the required distance
-        int ticks = (int) (rotation * ANDY_TICKS_PER_ROTATION);
-
-        // Set the target position for all motors (in ticks)
-        Slide_L.setTargetPosition(ticks);
-        Slide_R.setTargetPosition((-1) * ticks);
-
-
-        //Set power of all motors
-        Slide_R.setPower(power);
-        Slide_L.setPower(power);
-
-        //Set Motors to RUN_TO_POSITION
-        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //Wait for them to reach to the position
-        // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
-        while (Slide_R.isBusy()) {
-            //Waiting for Robot to travel the distance
-            telemetry.addData("Slide", "UP");
-            telemetry.update();
-        }
-
-
-        //Reached the distance, so stop the motors
-        Slide_R.setPower(0);
-        Slide_L.setPower(0);
-
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "TICKS needed : " + ticks);
-            Log.i(TAG, "Actual Ticks Motor0 : " + Slide_R.getCurrentPosition());
-            Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
-            Log.i(TAG, "Exit Function: moveSlideUp");
-        }
-        Log.i(TAG, "Exit Function moveSlideUp ");
-    }
-
-    public void moveSlideDown(double power, double rotation)
-    {
-        Log.i(TAG, "Enter Function moveSlideDown Power: "+ power + " Rotation :" + rotation);
-        // Reset all encoders
-        Slide_R.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slide_L.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Find the motor ticks needed to travel the required distance
-        int ticks = (int) (rotation * ANDY_TICKS_PER_ROTATION);
-
-        // Set the target position for all motors (in ticks)
-        Slide_L.setTargetPosition((-1) * ticks);
-        Slide_R.setTargetPosition(ticks);
-
-
-        //Set power of all motors
-        Slide_R.setPower(power);
-        Slide_L.setPower(power);
-
-        //Set Motors to RUN_TO_POSITION
-        Slide_R.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Slide_L.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //Wait for them to reach to the position
-        // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
-        while (Slide_R.isBusy()) {
-            //Waiting for Robot to travel the distance
-            telemetry.addData("Slide", "Down");
-            telemetry.update();
-        }
-
-
-        //Reached the distance, so stop the motors
-        Slide_R.setPower(0);
-        Slide_L.setPower(0);
-
-
-        if (DEBUG_INFO) {
-            Log.i(TAG, "TICKS needed : " + ticks);
-            Log.i(TAG, "Actual Ticks Motor0 : " + Slide_R.getCurrentPosition());
-            Log.i(TAG, "Actual Ticks Motor1 : " + Slide_L.getCurrentPosition());
-            Log.i(TAG, "Exit Function: moveSlideDown");
-        }
-        Log.i(TAG, "Exit Function moveSlideDown ");
-    }
-*/
     public void grabStone() {
         Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
         pincher.setPosition(0.8);
@@ -1027,8 +834,6 @@ public class Robot extends java.lang.Thread {
 
     /* IMU based turn functions */
 
-    Orientation             lastAngles = new Orientation();
-    double                  globalAngle, power = .30, correction;
 
     /**
      * Resets the cumulative angle tracking to zero.
