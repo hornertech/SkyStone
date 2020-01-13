@@ -29,7 +29,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 @Autonomous
-public class loadingRed extends LinearOpMode {
+public class vuforiaMove extends LinearOpMode {
 
     public String TAG = "FTC";
     private static final String VUFORIA_KEY = "AV8zEej/////AAABmVo2vNWmMUkDlkTs5x1GOThRP0cGar67mBpbcCIIz/YtoOvVynNRmJv/0f9Jhr9zYd+f6FtI0tYHqag2teC5GXiKrNM/Jl7FNyNGCvO9zVIrblYF7genK1FVH3X6/kQUrs0vnzd89M0uSAljx0mAcgMEEUiNOUHh2Fd7IOgjlnh9FiB+cJ8bu/3WeKDxnDdqx6JI5BlQ4w7YW+3X2icSRDRlvE4hhuW1VM1BTPQgds7OtHKqUn4Z5w1Wqg/dWiOHxYTww28PVeg3ae4c2l8FUtE65jr2qQdQNc+DMLDgnJ0fUi9Ww28OK/aNrQQnHU97TnUgjLgCTlV7RXpfut5mZWXbWvO6wA6GGkm3fAIQ2IPL";
@@ -144,7 +144,7 @@ public class loadingRed extends LinearOpMode {
             //robot.moveRightToPosition(0.5, correctionDistance);
             robot.moveRightForTime(0.5, (int)(correctionDistance*85), false);
             if (location[2] >= 2.5 ){
-                skystoneLocation--;
+                skystoneLocation++;
             }
         }
         else if (location[2] < 0)
@@ -153,7 +153,7 @@ public class loadingRed extends LinearOpMode {
             //robot.moveLeftToPosition(0.5, java.lang.Math.abs(correctionDistance));
             robot.moveLeftForTime(0.5, (int)(correctionDistance*85), false);
             if (location[2] <= -5 ){
-                skystoneLocation++;
+                skystoneLocation--;
             }
         }
 
@@ -161,7 +161,7 @@ public class loadingRed extends LinearOpMode {
         robot.fixOrientation(0);
 
         //Move Forward to Target
-        robot.moveForwardToPosition(0.45, (java.lang.Math.abs (location[1])));
+        robot.moveForwardToPosition(0.45, (java.lang.Math.abs (location[1]) - 3.5));
 
         location[0]  = 0;
         Log.i(TAG, "Exiting Function moveToSkyStone");
@@ -228,170 +228,19 @@ public class loadingRed extends LinearOpMode {
         telemetry.update();
         waitForStart();
         Log.i(TAG, "*************Starting Autonomous TEST**************************");
-
         targetsSkyStone.activate();
-
-//BEGINNING AUTONOMOUS CODE
-        /*
-        Our autonomous code for the Loading Side Blue has multiple facets
-            1) First, we begin by moving forward and raising our slides, getting into a position
-            to detect
-            2) We then begin our detection For Loop
-                - This loop goes 5 times, looking for a skystone
-                - If the skystone is found, we run moveToSkystone to get into a position to grab
-                - Next, we cross the bridge, attempt to drop the skystone on top of the foundation
-                  if it has been placed in the triangle area, then return back and get ready for the
-                  next detection
-            3) After we drop the second stone, we park on the middle line
-            4) In total, our team can score 33 points from this Loading zone program
-         */
-        Robot.grabStone();
-        Robot.moveWithSlide(0.4, 650, 1, 1, 1);
-        Robot.dropStone();
-        Robot.dropStone();
-        //Our Detection Algorithm
-        for (i = skystoneLocation; i < 6; i++) {
-
-            if(secondSkyStoneLocation != 5){
-                sleep(400);
-                detectOnce(allTrackables);
-                detectOnce(allTrackables);
-            }
-            //Detect Skystone
-            //Check if skystone has been detected
-            if (location[0] == 1) {
-                skystoneLocation = i;
-                skystonePicked++;
-
-                Robot.moveSlides(-1, 650, false);
+        while(true) {
+            sleep(1000);
+            detectOnce(allTrackables);
+            if (location[0] == 1){
                 moveToSkyStone(Robot); // Runs correction program to get to the skystone
-                if(skystonePicked == 1){
-                    secondSkyStoneLocation = skystoneLocation + 3;
-                }
-                Log.i(TAG, "++++++Detected Stone at Location : " + (skystoneLocation + 1) + " index: " + i + "Second Skystone: " + (secondSkyStoneLocation + 1));
-                Robot.grabStone();
-                sleep(400);
-                Robot.moveBackwardForTime(0.5, 200, false );
-                Robot.rotateRight(-91, 0.75);
-                if(skystonePicked == 1) {
-                    //Robot.moveForwardForTime(1, 600 + ((  * stoneForwardTime), false);
-                    Robot.moveForwardToPosition(1, 39+8*skystoneLocation);
-                }
-                else{
-                    //Robot.moveForwardForTime(1, 600 + (secondSkyStoneLocation + 1) * stoneForwardTime, false);
-                    Robot.moveForwardToPosition(1, 39 + 8*secondSkyStoneLocation);
-                }
-                //Robot.moveWithSlide(0.345, 700, 1,  1, 1);
-                Robot.moveSlides(1, 700, false);
-                Robot.moveForwardForTime(0.4, 275, false);
-                Robot.dropStone();
-                sleep(400);
-                Robot.moveBackwardForTime(0.4, 275, false);
-                Robot.moveSlides(-1, 700, false);
-                //Robot.moveWithSlide(0.325, 700, -1, 1, -1);
-
-                if (skystonePicked == 2) {
-                    // Delivered both skystones, go park
-                    Robot.moveBackwardForTime(1, 180, false);
-                    skystoneLocation = 6;
-                    break;
-                } else {
-                    // First skystone delivered, go back to find the second one
-                    Robot.moveBackwardToPosition(0.75, 39 + secondSkyStoneLocation*8);
-                    if (secondSkyStoneLocation == 5){
-                        Robot.moveForwardForTime(0.5, 100, false);
-                    }
-                    Robot.moveSlides(1, 700, false);
-                    Robot.slowTurn(90);
-                    sleep(800);
-                    Robot.fixOrientation(0);
-                    Robot.moveBackwardForTime(0.5, 100, false );
-                    i = secondSkyStoneLocation-1;
-                }
-                // In the case that Skystone was not detected
-            } else {
-                // Stone in front is not skystone, move to next one
-                Robot.slowTurn(-0.5);
-                Robot.moveLeftForTime(0.45, stoneStrafeTime, false);
-            }
-
-            if (i == 5 & skystonePicked != 2) {
-                // If you haven't detected 2 stones, try and get 6th stone
-                Log.i(TAG, "+++++++ Second Stone not detected, picking from: " + (secondSkyStoneLocation+1));
-                if(secondSkyStoneLocation == -1 || secondSkyStoneLocation == 4 || secondSkyStoneLocation > 5){
-                    Robot.moveRightForTime(0.5, 420, false);
-                    Robot.grabStone();
-                    Robot.dropStone();
-                    sleep(500);
-                    Robot.fixOrientation(0);
-                    detectOnce(allTrackables);
-                    Robot.moveSlides(-1, 700, false);
-                    if (location[0] == 1)
-                    {
-                        moveToSkyStone(Robot);
-                    }
-                    else {
-                        Robot.moveForwardToPosition(0.5, 13);
-                    }
-
-                    Robot.grabStone();
-                    sleep(500);
-                    Robot.moveBackwardForTime(0.5, 300, false);
-                    Robot.rotateRight(-90, 0.75);
-                    Robot.moveForwardToPosition(0.75, 78);
-                    Robot.dropStone();
-                    sleep(400);
-                    Robot.moveBackwardForTime(0.7, 250, false);
-                }
-                else if(secondSkyStoneLocation == 3){
-                    Robot.moveRightForTime(0.5, 880, false);
-                    Robot.grabStone();
-                    Robot.dropStone();
-                    sleep(500);
-                    Robot.fixOrientation(0);
-                    detectOnce(allTrackables);
-                    Robot.moveSlides(-1, 700, false);
-                    if (location[0] == 1)
-                    {
-                        moveToSkyStone(Robot);
-                    }
-                    else {
-                        Robot.moveForwardToPosition(0.5, 15.5);
-                    }
-
-                    Robot.grabStone();
-                    sleep(500);
-                    Robot.moveBackwardForTime(0.5, 240, false);
-                    Robot.rotateRight(-90, 0.75);
-                    Robot.moveForwardToPosition(0.75, 70);
-                    Robot.dropStone();
-                    sleep(400);
-                    Robot.moveBackwardForTime(0.7, 250, false);
-                }
-                else if(secondSkyStoneLocation == 5) {
-                    Robot.moveSlides(-1, 700, false);
-                    Robot.moveRightForTime(0.6, 330, false);
-                    Robot.grabStone();
-                    Robot.dropStone();
-                    Robot.moveForwardForTime(0.3, 200, false);
-
-                    Robot.slowTurn(25);
-                    //Robot.moveForwardToPosition(0.3, 10);
-                    Robot.moveForwardForTime(0.3, 800, false);
-                    Robot.grabStone();
-                    sleep(500);
-                    Robot.moveBackwardForTime(0.35, 300, false);
-                    Robot.slowTurn(-128);
-                    sleep(800);
-                    Robot.fixOrientation(-88.5);
-                    Robot.moveForwardToPosition(1, 78);
-                    Robot.dropStone();
-                    sleep(400);
-                    Robot.moveBackwardForTime(0.7, 250, false);
-                }
+                break;
             }
         }
-        targetsSkyStone.deactivate();
+
+
+
+        //targetsSkyStone.deactivate();
     }
 
 

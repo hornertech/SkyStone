@@ -7,20 +7,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-
 
 public class Robot extends java.lang.Thread {
 
@@ -29,43 +23,39 @@ public class Robot extends java.lang.Thread {
 
     //private static final int TICKS_PER_ROTATION = 1440; //Tetrix motor specific
     private static final int TICKS_PER_ROTATION = 1120; //Tetrix motor specific
-    private static final int ANDY_TICKS_PER_ROTATION = 1120; //ANDYMArks motor specific
     private static final double WHEEL_DIAMETER = 6.25; //Wheel diameter in inches
-    public String TAG = "FTC";
+    private String TAG = "FTC";
 
-    public DcMotorEx Motor_FL;
-    public DcMotorEx Motor_FR;
-    public DcMotorEx Motor_BR;
-    public DcMotorEx Motor_BL;
+    private DcMotorEx Motor_FL;
+    private DcMotorEx Motor_FR;
+    private DcMotorEx Motor_BR;
+    private DcMotorEx Motor_BL;
 
-    public DcMotor Slide_L;
-    public DcMotor Slide_R;
+    private DcMotor Slide_L;
+    private DcMotor Slide_R;
 
-    public DcMotor Clamp_L;
-    public DcMotor Clamp_R;
+    private DcMotor Clamp_L;
+    private DcMotor Clamp_R;
 
-    public Servo pincher;
-
-    public ElapsedTime mRuntime;
-
+    private Servo pincher;
 
     // The IMU sensor object
-    BNO055IMU imu;
+    private BNO055IMU imu;
 
     // State used for updating telemetry
-    Orientation     angles;
-    PIDController   pidRotate, pidDrive;
-    Orientation     lastAngles = new Orientation();
-    double          globalAngle, correction;
+    private Orientation     angles;
+    private PIDController   pidRotate, pidDrive;
+    private Orientation     lastAngles = new Orientation();
+    private double          globalAngle, correction;
 
     public boolean isTeleOp     = true;
-    public boolean DEBUG_DEBUG  = false;
-    public boolean DEBUG_INFO   = false;
+    private boolean DEBUG_DEBUG  = false;
+    private boolean DEBUG_INFO   = false;
 
-    public long     movementFactor      = 1;
-    public double   turnFactor          = 7.2;
-    public double   leftStrafeFactor    = 1.31;
-    public double   rightStrafeFactor   = 1.31;
+    private long     movementFactor      = 1;
+    private double   turnFactor          = 7.2;
+    private double   leftStrafeFactor    = 1.31;
+    private double   rightStrafeFactor   = 1.31;
 
     Robot(HardwareMap map, Telemetry tel) {
         hardwareMap = map;
@@ -95,6 +85,11 @@ public class Robot extends java.lang.Thread {
 
         Motor_BL.setVelocityPIDFCoefficients(0.93, 0.093, 0, 9.3);
         Motor_BL.setPositionPIDFCoefficients(5.0);
+
+        Motor_FL.setTargetPositionTolerance(15);
+        Motor_FR.setTargetPositionTolerance(15);
+        Motor_BL.setTargetPositionTolerance(15);
+        Motor_BR.setTargetPositionTolerance(15);
 
         Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
         Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
@@ -136,6 +131,7 @@ public class Robot extends java.lang.Thread {
 
 
     private void initDevices() {
+        ElapsedTime mRuntime;
         mRuntime = new ElapsedTime();
         mRuntime.reset();
 
@@ -153,7 +149,7 @@ public class Robot extends java.lang.Thread {
 
     }
 
-    public void pause(int milliSec) {
+    private void pause(int milliSec) {
         try {
             sleep(milliSec);
         } catch (Exception e) {
@@ -162,7 +158,7 @@ public class Robot extends java.lang.Thread {
 
     // This function takes input distance in inches and will return Motor ticks needed
     // to travel that distance based on wheel diameter
-    public int DistanceToTick(double distance) {
+    private int DistanceToTick(double distance) {
         // Log.i(TAG, "Enter FUNC: DistanceToTick");
 
         double circumference = WHEEL_DIAMETER * 3.14;
@@ -179,7 +175,7 @@ public class Robot extends java.lang.Thread {
     }
     // This function takes input Angle (in degrees)  and it will return Motor ticks needed
     // to make that Turn2
-    public int AngleToTick(double angle) {
+    private int AngleToTick(double angle) {
         Log.i(TAG, "Enter FUNC: AngleToTick");
 
         int encoder_ticks = (int) ((java.lang.Math.abs(angle) * TICKS_PER_ROTATION ) / 360);
@@ -205,6 +201,8 @@ public class Robot extends java.lang.Thread {
     public void moveBackwardToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveBackwardToPosition Power : " + power + " and distance : " + distance);
         // Reset all encoders
+        long startTime = System.currentTimeMillis();
+
         Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -234,6 +232,9 @@ public class Robot extends java.lang.Thread {
         //Wait for them to reach to the position
         //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
         while (Motor_BL.isBusy() && Motor_FR.isBusy()) {
+            if ((System.currentTimeMillis() - startTime) > 2000){
+                break;
+            }
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -265,6 +266,7 @@ public class Robot extends java.lang.Thread {
     // Move backward to specific distance in inches, with power (0 to 1)
     public void moveForwardToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveForwardToPosition Power : " + power + " and distance : " + distance);
+        long startTime = System.currentTimeMillis();
 
         // Reset all encoders
         Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -295,7 +297,11 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
-        while (Motor_FR.isBusy()&& Motor_FR.isBusy()) {
+        while (Motor_FR.isBusy()&& Motor_BL.isBusy()) {
+
+            if ((System.currentTimeMillis() - startTime) > 2000){
+                break;
+            }
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -358,7 +364,7 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FR.isBusy() && Motor_BL.isBusy()) || (Motor_FL.isBusy() && Motor_BR.isBusy())){
-        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BL.isBusy()) {
+        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy()) {
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -420,7 +426,7 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FL.isBusy() && Motor_BR.isBusy()) || (Motor_FR.isBusy() && Motor_BL.isBusy())){
-        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BL.isBusy()) {
+        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy()) {
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -478,6 +484,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
@@ -506,6 +513,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
@@ -535,6 +543,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         Motor_FL.setPower(0);
@@ -561,6 +570,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
@@ -588,6 +598,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
@@ -607,6 +618,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
@@ -625,6 +637,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
@@ -644,6 +657,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
@@ -664,6 +678,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
@@ -682,6 +697,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Clamp_L.setPower(0);
         Clamp_R.setPower(0);
@@ -695,6 +711,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Clamp_L.setPower(0);
         Clamp_R.setPower(0);
@@ -718,6 +735,7 @@ public class Robot extends java.lang.Thread {
                 Log.i(TAG, "SlowTurn Sleep: "+ sleepTime);
                 sleep(sleepTime);
             } catch (Exception e) {
+                e.printStackTrace();
             }
             Motor_FL.setPower(0);
             Motor_FR.setPower(0);
@@ -732,6 +750,7 @@ public class Robot extends java.lang.Thread {
                 Log.i(TAG, "SlowTurn Sleep: "+ sleepTime);
                 sleep(sleepTime);
             } catch (Exception e) {
+                e.printStackTrace();
             }
             Motor_FL.setPower(0);
             Motor_FR.setPower(0);
@@ -747,7 +766,12 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
+    public void tolerance(){
+        int tolerance1;
+        tolerance1 = Motor_FL.getTargetPositionTolerance();
+        Log.i(TAG, "" + tolerance1);
 
+    }
     public void dropStone() {
         Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
         pincher.setPosition(0.4);
@@ -778,6 +802,7 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
@@ -826,14 +851,13 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(time);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Reached the distance, so stop the motors
         Slide_L.setPower(0);
         Slide_R.setPower(0);
 
-        long Slide_R_End = Slide_R.getCurrentPosition();
-        long Slide_L_End = Slide_L.getCurrentPosition();
         Log.i(TAG, "Exit Function: moveSlides");
     }
 
@@ -881,7 +905,7 @@ public class Robot extends java.lang.Thread {
      * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
-    public void rotate(int degrees, double power)
+    public void rotateLeft(int degrees, double power)
     {
         Log.i(TAG, "Enter Function: rotate, Angle: " + degrees);
 
@@ -939,7 +963,7 @@ public class Robot extends java.lang.Thread {
             {
                 angle = getAngle();
                 power = pidRotate.performPID(angle); // power will be - on right turn.
-             //   Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
+                //   Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
                 Motor_FL.setPower(power);
                 Motor_FR.setPower(power);
                 Motor_BL.setPower(power);
@@ -951,7 +975,7 @@ public class Robot extends java.lang.Thread {
             {
                 angle = getAngle();
                 power = pidRotate.performPID(angle); // power will be + on left turn.
-              //  Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
+                //  Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
                 Motor_FL.setPower(-power);
                 Motor_FR.setPower(-power);
                 Motor_BL.setPower(-power);
@@ -970,6 +994,113 @@ public class Robot extends java.lang.Thread {
         try {
             sleep(500);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // reset angle tracking on new heading.
+        resetAngle();
+        Log.i(TAG, "Exit Function: rotate");
+    }
+
+    /**
+     * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
+     * @param degrees Degrees to turn, + is left - is right
+     */
+    public void rotateRight(int degrees, double power)
+    {
+        Log.i(TAG, "Enter Function: rotate, Angle: " + degrees);
+
+        double angle;
+        Motor_FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Motor_BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+       /* Motor_FL.setDirection(DcMotorEx.Direction.REVERSE);
+        Motor_FR.setDirection(DcMotorEx.Direction.REVERSE);
+        Motor_BL.setDirection(DcMotorEx.Direction.REVERSE);
+        Motor_BR.setDirection(DcMotorEx.Direction.REVERSE);*/
+        // restart imu angle tracking.
+        resetAngle();
+
+        // if degrees > 359 we cap at 359 with same sign as original degrees.
+        if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
+
+        // start pid controller. PID controller will monitor the turn angle with respect to the
+        // target angle and reduce power as we approach the target angle. This is to prevent the
+        // robots momentum from overshooting the turn after we turn off the power. The PID controller
+        // reports onTarget() = true when the difference between turn angle and target angle is within
+        // 1% of target (tolerance) which is about 1 degree. This helps prevent overshoot. Overshoot is
+        // dependant on the motor and gearing configuration, starting power, weight of the robot and the
+        // on target tolerance. If the controller overshoots, it will reverse the sign of the output
+        // turning the robot back toward the setpoint value.
+
+        pidRotate.reset();
+        pidRotate.setSetpoint(degrees);
+        pidRotate.setInputRange(0, degrees);
+        pidRotate.setOutputRange(0, power);
+        pidRotate.setTolerance(1);
+        pidRotate.enable();
+
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+
+        if (degrees < 0)
+        {
+            // On right turn we have to get off zero first.
+          /*  while (getAngle() == 0)
+            {
+                // set power to rotate.
+                Motor_FL.setPower(power);
+                Motor_FR.setPower(power);
+                Motor_BL.setPower(power);
+                Motor_BR.setPower(power);
+                Log.i(TAG, "Function: rotate, Angle less then 0 Motor Power set to: " + power);
+                try {
+                    sleep(100);
+                } catch (Exception e) {
+                }
+            }*/
+
+            do
+            {
+                angle = getAngle();
+                power = pidRotate.performPID(angle); // power will be - on right turn.
+                //   Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
+                Motor_FL.setPower(-power);
+                Motor_FR.setPower(-power);
+                Motor_BL.setPower(-power);
+                Motor_BR.setPower(-power);
+            } while (!pidRotate.onTarget());
+        }
+        else    // left turn.
+            do
+            {
+                angle = getAngle();
+                power = pidRotate.performPID(angle); // power will be + on left turn.
+                //  Log.i(TAG, "Function: rotate, Angle More then 0 Motor Power set to: " + power + "Angle : " + angle);
+                Motor_FL.setPower(power);
+                Motor_FR.setPower(power);
+                Motor_BL.setPower(power);
+                Motor_BR.setPower(power);
+            } while (!pidRotate.onTarget());
+
+        // turn the motors off.
+        Motor_FL.setPower(0);
+        Motor_FR.setPower(0);
+        Motor_BL.setPower(0);
+        Motor_BR.setPower(0);
+
+        //rotation = getAngle();
+
+        // wait for rotation to stop.
+        try {
+            sleep(500);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         // reset angle tracking on new heading.

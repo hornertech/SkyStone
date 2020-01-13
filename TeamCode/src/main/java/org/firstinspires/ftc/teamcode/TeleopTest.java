@@ -78,10 +78,11 @@ public class TeleopTest extends LinearOpMode{
             }
 
             if(this.gamepad1.y == true) {
-                robot.rotate(85, 0.75);
+                robot.rotateLeft(85, 0.75);
             }
             if(this.gamepad1.a == true) {
-                robot.moveForwardToPosition(0.75, 48);
+                //robot.rotate(190, 75);
+                robot.rotateRight(-90, 0.75);
             }
 
             /****************** GamePad 2 **************/
@@ -130,6 +131,13 @@ public class TeleopTest extends LinearOpMode{
 
             if (this.gamepad2.right_stick_y < -0.5) {
                 robot.moveSlides(1, 10, true);
+            }
+
+            if(this.gamepad2.right_trigger == 1){
+                robot.moveSlides(0,0, false);
+            }
+            if(this.gamepad2.a == true){
+                robot.tolerance();
             }
 
         };

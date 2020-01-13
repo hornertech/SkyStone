@@ -272,7 +272,7 @@ public class loadingBlue extends LinearOpMode {
                 Robot.grabStone();
                 sleep(400);
                 Robot.moveBackwardForTime(0.5, 200, false );
-                Robot.rotate(85, 0.75);
+                Robot.rotateLeft(85, 0.75);
                 if(skystonePicked == 1) {
                     //Robot.moveForwardForTime(1, 600 + ((  * stoneForwardTime), false);
                     Robot.moveForwardToPosition(1, 41+8*skystoneLocation);
@@ -337,7 +337,7 @@ public class loadingBlue extends LinearOpMode {
                     Robot.grabStone();
                     sleep(500);
                     Robot.moveBackwardForTime(0.5, 300, false);
-                    Robot.rotate(85, 0.75);
+                    Robot.rotateLeft(85, 0.75);
                     Robot.moveForwardToPosition(0.75, 78);
                     Robot.dropStone();
                     sleep(400);
@@ -362,7 +362,7 @@ public class loadingBlue extends LinearOpMode {
                     Robot.grabStone();
                     sleep(500);
                     Robot.moveBackwardForTime(0.5, 280, false);
-                    Robot.rotate(85, 0.75);
+                    Robot.rotateLeft(85, 0.75);
                     Robot.moveForwardToPosition(0.75, 70);
                     Robot.dropStone();
                     sleep(400);
