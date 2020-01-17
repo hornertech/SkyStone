@@ -232,7 +232,7 @@ public class Robot extends java.lang.Thread {
         //Wait for them to reach to the position
         //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
         while (Motor_BL.isBusy() && Motor_FR.isBusy()) {
-            if ((System.currentTimeMillis() - startTime) > 2000){
+            if ((System.currentTimeMillis() - startTime) > 3000){
                 break;
             }
             if (DEBUG_DEBUG) {
@@ -299,7 +299,7 @@ public class Robot extends java.lang.Thread {
         // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
         while (Motor_FR.isBusy()&& Motor_BL.isBusy()) {
 
-            if ((System.currentTimeMillis() - startTime) > 2000){
+            if ((System.currentTimeMillis() - startTime) > 3000){
                 break;
             }
             if (DEBUG_DEBUG) {
@@ -333,7 +333,7 @@ public class Robot extends java.lang.Thread {
     // Move Left to specific distance in inches, with power (0 to 1)
     public void moveRightToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveRightToPosition Power : " + power + " and distance : " + distance);
-
+        long startTime = System.currentTimeMillis();
         // Reset all encoders
         Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -350,8 +350,8 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setTargetPosition((-1) * ticks);
 
         //Set power of all motors
-        Motor_FL.setPower(power);
-        Motor_FR.setPower(power);
+        Motor_FL.setPower((0.92) * power);
+        Motor_FR.setPower((0.92) * power);
         Motor_BR.setPower(power);
         Motor_BL.setPower(power);
 
@@ -364,7 +364,13 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FR.isBusy() && Motor_BL.isBusy()) || (Motor_FL.isBusy() && Motor_BR.isBusy())){
-        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy()) {
+        while ((Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy())&&((System.currentTimeMillis() - startTime) < 1000)) {
+
+          /*  if ((System.currentTimeMillis() - startTime) > 3000){
+                Log.i(TAG, "moveRightToPosition : breaking out as time is more than 3 sec");
+                break;
+            }*/
+
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());
@@ -395,7 +401,7 @@ public class Robot extends java.lang.Thread {
     // Move Right to specific distance in inches, with power (0 to 1)
     public void moveLeftToPosition(double power, double distance) {
         Log.i(TAG, "Enter Function: moveLeftToPosition Power : " + power + " and distance : " + distance);
-
+        long startTime = System.currentTimeMillis();
         // Reset all encoders
         Motor_FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -412,8 +418,8 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setTargetPosition(ticks);
 
         //Set power of all motors
-        Motor_FL.setPower(power);
-        Motor_FR.setPower(power);
+        Motor_FL.setPower((0.92) * power);
+        Motor_FR.setPower((0.92) * power);
         Motor_BR.setPower(power);
         Motor_BL.setPower(power);
 
@@ -426,7 +432,13 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FL.isBusy() && Motor_BR.isBusy()) || (Motor_FR.isBusy() && Motor_BL.isBusy())){
-        while (Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy()) {
+        while ((Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy())&&((System.currentTimeMillis() - startTime) < 1000)) {
+
+
+            if ((System.currentTimeMillis() - startTime) > 3000){
+                break;
+            }
+
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
                 Log.i(TAG, "Actual Ticks Motor1 : " + Motor_FR.getCurrentPosition());

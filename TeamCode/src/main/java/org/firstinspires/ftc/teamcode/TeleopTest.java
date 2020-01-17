@@ -77,13 +77,13 @@ public class TeleopTest extends LinearOpMode{
                 robot.moveB(0.5, 1);
             }
 
-            if(this.gamepad1.y == true) {
-                robot.rotateLeft(85, 0.75);
+        /*    if(this.gamepad1.y == true) {
+                robot.moveLeftToPosition(0.4, 8);
             }
             if(this.gamepad1.a == true) {
                 //robot.rotate(190, 75);
-                robot.rotateRight(-90, 0.75);
-            }
+                robot.moveRightToPosition(0.4, 8);
+            }*/
 
             /****************** GamePad 2 **************/
             // Pincher

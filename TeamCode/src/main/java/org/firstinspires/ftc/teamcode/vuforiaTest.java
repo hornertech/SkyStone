@@ -30,6 +30,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 @Autonomous
+@Disabled
 public class vuforiaTest extends LinearOpMode {
 
     public String TAG = "FTC";
