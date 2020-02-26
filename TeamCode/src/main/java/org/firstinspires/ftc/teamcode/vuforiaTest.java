@@ -30,7 +30,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 @Autonomous
-@Disabled
+
 public class vuforiaTest extends LinearOpMode {
 
     public String TAG = "FTC";
@@ -56,13 +56,7 @@ public class vuforiaTest extends LinearOpMode {
     private float phoneZRotate    = 0;
 
     private double location[] = {0, 0, 0, 0, 0, 0, 0};
-    // Location[0] : 0 = Target not visible, 1 = Target visible
-    // Location[1] : Lateral drift from target
-    // Location[2] : Distance from Target
-    // Location[3] : Vertical shift, not needed for our program
-    // Location[4] : Vertical Angle Shift; Not useful for our program
-    // Location[5] : Upward Angle Shift; Not useful for our program
-    // Location[6] : Horizontal Angle Shift
+
     private int boardDistance = 30;
     private int bridgeOffset = 10;
     private int skystonePicked = 0;
@@ -131,47 +125,6 @@ public class vuforiaTest extends LinearOpMode {
         }
         telemetry.update();
     }
-    /* Move to skystone is our correction program;
-       This program uses the angle shift, lateral shift, and distance from target recorded
-       by Vuforia to move the robot to the correct position.
-    */
-
-    public void moveToSkyStone(org.firstinspires.ftc.teamcode.Robot robot) {
-
-        Log.i(TAG, "Entering Function moveToSkyStone");
-        //Correct Lateral Shift
-        if (location[2] > 0)
-        {
-            correctionDistance = (location[2]);
-            //robot.moveRightToPosition(0.5, correctionDistance);
-            robot.moveRightForTime(0.5, (int)(50*correctionDistance), false);
-            if (location[2] >= 2.5 ){
-                skystoneLocation++;
-            }
-        }
-        else if (location[2] < 0)
-        {
-            correctionDistance = (java.lang.Math.abs(location[2]));
-            robot.moveLeftForTime(0.5,(int)(50*correctionDistance), false);
-            if (location[2] <= -5 ){
-                skystoneLocation--;
-            }
-        }
-/*
-        //Correct Angle
-        if (java.lang.Math.abs(location[6]) > 1){
-            robot.slowTurn((int)location[6] * (-1));
-        }
-*/
-        sleep(450);
-        robot.fixOrientation(0);
-
-        //Move Forward to Target
-        robot.moveForwardToPosition(0.6, (java.lang.Math.abs (location[1]) - 4.5));
-
-        location[0]  = 0;
-        Log.i(TAG, "Exiting Function moveToSkyStone");
-    }
 
 
     //The Autonomous Program
@@ -192,6 +145,30 @@ public class vuforiaTest extends LinearOpMode {
         //Load stone target object
         VuforiaTrackable stoneTarget = targetsSkyStone.get(0);
         stoneTarget.setName("Stone Target");
+        VuforiaTrackable blueRearBridge = targetsSkyStone.get(1);
+        blueRearBridge.setName("Blue Rear Bridge");
+        VuforiaTrackable redRearBridge = targetsSkyStone.get(2);
+        redRearBridge.setName("Red Rear Bridge");
+        VuforiaTrackable redFrontBridge = targetsSkyStone.get(3);
+        redFrontBridge.setName("Red Front Bridge");
+        VuforiaTrackable blueFrontBridge = targetsSkyStone.get(4);
+        blueFrontBridge.setName("Blue Front Bridge");
+        VuforiaTrackable red1 = targetsSkyStone.get(5);
+        red1.setName("Red Perimeter 1");
+        VuforiaTrackable red2 = targetsSkyStone.get(6);
+        red2.setName("Red Perimeter 2");
+        VuforiaTrackable front1 = targetsSkyStone.get(7);
+        front1.setName("Front Perimeter 1");
+        VuforiaTrackable front2 = targetsSkyStone.get(8);
+        front2.setName("Front Perimeter 2");
+        VuforiaTrackable blue1 = targetsSkyStone.get(9);
+        blue1.setName("Blue Perimeter 1");
+        VuforiaTrackable blue2 = targetsSkyStone.get(10);
+        blue2.setName("Blue Perimeter 2");
+        VuforiaTrackable rear1 = targetsSkyStone.get(11);
+        rear1.setName("Rear Perimeter 1");
+        VuforiaTrackable rear2 = targetsSkyStone.get(12);
+        rear2.setName("Rear Perimeter 2");
 
         // Set Stone Target Position
         stoneTarget.setLocation(OpenGLMatrix
@@ -201,7 +178,7 @@ public class vuforiaTest extends LinearOpMode {
         // Next, translate the camera lens to where it is on the robot.
         final float CAMERA_FORWARD_DISPLACEMENT = 0.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
         final float CAMERA_VERTICAL_DISPLACEMENT = 5.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT = 1.5f * mmPerInch;     // eg: Camera is ON the robot's center line
+        final float CAMERA_LEFT_DISPLACEMENT = 7.5f * mmPerInch;     // eg: Camera is ON the robot's center line
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();

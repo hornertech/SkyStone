@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Robot;
@@ -17,7 +19,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
-@Disabled
 public class MaxVelocityTest extends LinearOpMode {
 
     DcMotorEx motor;
@@ -26,7 +27,7 @@ public class MaxVelocityTest extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        motor = hardwareMap.get(DcMotorEx.class, "motor_br");
+        motor = hardwareMap.get(DcMotorEx.class, "motor_bl");
         waitForStart();
         while (opModeIsActive()) {
             motor.setPower(1);
@@ -35,8 +36,10 @@ public class MaxVelocityTest extends LinearOpMode {
                 maxVelocity = currentVelocity;
             }
             telemetry.addData("current velocity", currentVelocity);
+            Log.i("FTC", "current velocity : "+ currentVelocity);
             telemetry.addData("maximum velocity", maxVelocity);
-            telemetry.update();
+            Log.i("FTC", "maximum velocity : "+ maxVelocity);
+                    telemetry.update();
 
         }
     }

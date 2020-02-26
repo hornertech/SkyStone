@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,7 +24,7 @@ public class Robot extends java.lang.Thread {
 
     //private static final int TICKS_PER_ROTATION = 1440; //Tetrix motor specific
     private static final int TICKS_PER_ROTATION = 1120; //Tetrix motor specific
-    private static final double WHEEL_DIAMETER = 6.25; //Wheel diameter in inches
+    private static final double WHEEL_DIAMETER = 4; //Wheel diameter in inches
     private String TAG = "FTC";
 
     private DcMotorEx Motor_FL;
@@ -34,13 +35,15 @@ public class Robot extends java.lang.Thread {
     private DcMotor Slide_L;
     private DcMotor Slide_R;
 
-    private DcMotor Clamp_L;
-    private DcMotor Clamp_R;
+    //private DcMotor Clamp_L;
+    //private DcMotor Clamp_R;
 
     private Servo pincher;
-
+    private Servo capper;
     // The IMU sensor object
     private BNO055IMU imu;
+
+    private final int tollerance = 15;
 
     // State used for updating telemetry
     private Orientation     angles;
@@ -54,14 +57,37 @@ public class Robot extends java.lang.Thread {
 
     private long     movementFactor      = 1;
     private double   turnFactor          = 7.2;
-    private double   leftStrafeFactor    = 1.31;
-    private double   rightStrafeFactor   = 1.31;
+    private double   leftStrafeFactor    = 1.2;
+    private double   rightStrafeFactor   = 1.2;
 
     Robot(HardwareMap map, Telemetry tel) {
         hardwareMap = map;
         telemetry = tel;
         initDevices();
     }
+
+    /* Calculate Drivetrain PID cofficients */
+
+    private final int motorFLMaxSpeed = 3320;
+    double motorFLF = 32767/ (double)motorFLMaxSpeed;
+    double motorFLP = 0.1 * motorFLF;
+    double mototFLI = 0.1 * motorFLP;
+
+    private final int motorFRMaxSpeed = 3360;
+    double motorFRF = 32767/ (double)motorFRMaxSpeed;
+    double motorFRP = 0.1 * motorFRF;
+    double mototFRI = 0.1 * motorFRP;
+
+    private final int motorBLMaxSpeed = 3360;
+    double motorBLF = 32767/ (double)motorBLMaxSpeed;
+    double motorBLP = 0.1 * motorBLF;
+    double mototBLI = 0.1 * motorBLP;
+
+    private final int motorBRMaxSpeed = 3320;
+    double motorBRF = 32767/ (double)motorBRMaxSpeed;
+    double motorBRP = 0.1 * motorBRF;
+    double mototBRI = 0.1 * motorBRP;
+
 
     private void initDeviceCore() throws Exception {
 
@@ -74,7 +100,7 @@ public class Robot extends java.lang.Thread {
         Motor_BR = hardwareMap.get(DcMotorEx.class, "motor_br");
         Motor_BL = hardwareMap.get(DcMotorEx.class, "motor_bl");
 
-        Motor_FR.setVelocityPIDFCoefficients(0.95, 0.095, 0, 9.5);
+       /*Motor_FR.setVelocityPIDFCoefficients(0.95, 0.095, 0, 9.5);
         Motor_FR.setPositionPIDFCoefficients(5.0);
 
         Motor_FL.setVelocityPIDFCoefficients(0.95, 0.095, 0, 9.5);
@@ -84,7 +110,24 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPositionPIDFCoefficients(5.0);
 
         Motor_BL.setVelocityPIDFCoefficients(0.93, 0.093, 0, 9.3);
-        Motor_BL.setPositionPIDFCoefficients(5.0);
+        Motor_BL.setPositionPIDFCoefficients(5.0);*/
+
+        Log.i(TAG, "Motor FR Cofficients: P: " + motorFRP + " I: " + mototFRI + " F: " + motorFRF);
+        Log.i(TAG, "Motor FL Cofficients: P: " + motorFLP + " I: " + mototFLI + " F: " + motorFLF);
+        Log.i(TAG, "Motor BR Cofficients: P: " + motorBRP + " I: " + mototBRI + " F: " + motorBRF);
+        Log.i(TAG, "Motor BL Cofficients: P: " + motorBLP + " I: " + mototBLI + " F: " + motorBLF);
+
+        Motor_FR.setVelocityPIDFCoefficients(motorFRP, mototFRI, 0, motorFRF);
+        Motor_FR.setPositionPIDFCoefficients(8.2);
+
+        Motor_FL.setVelocityPIDFCoefficients(motorFLP, mototFLI, 0, motorFLF);
+        Motor_FL.setPositionPIDFCoefficients(8.0);
+
+        Motor_BR.setVelocityPIDFCoefficients(motorBRP, mototBRI, 0, motorBRF);
+        Motor_BR.setPositionPIDFCoefficients(8.2);
+
+        Motor_BL.setVelocityPIDFCoefficients(motorBLP, mototBLI, 0, motorBLF);
+        Motor_BL.setPositionPIDFCoefficients(8.0);
 
         Motor_FL.setTargetPositionTolerance(15);
         Motor_FR.setTargetPositionTolerance(15);
@@ -94,11 +137,11 @@ public class Robot extends java.lang.Thread {
         Slide_R = hardwareMap.get(DcMotor.class, "slide_r");
         Slide_L = hardwareMap.get(DcMotor.class, "slide_l");
 
-        Clamp_L = hardwareMap.get(DcMotor.class, "clamp_l");
-        Clamp_R = hardwareMap.get(DcMotor.class, "clamp_r");
+        //Clamp_L = hardwareMap.get(DcMotor.class, "clamp_l");
+        //Clamp_R = hardwareMap.get(DcMotor.class, "clamp_r");
 
         pincher = hardwareMap.get(Servo.class, "pincher");
-
+        capper = hardwareMap.get(Servo.class, "capper");
       /*  Motor_FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Motor_FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Motor_BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -115,7 +158,7 @@ public class Robot extends java.lang.Thread {
         // Set PID proportional value to start reducing power at about 50 degrees of rotation.
         // P by itself may stall before turn completed so we add a bit of I (integral) which
         // causes the PID controller to gently increase power if the turn is not completed.
-        pidRotate = new PIDController(.0075, .00009, 0);
+        pidRotate = new PIDController(.0099, .0001, 0);
 
         // Set PID proportional value to produce non-zero correction value when robot veers off
         // straight line. P value controls how sensitive the correction is.
@@ -186,6 +229,18 @@ public class Robot extends java.lang.Thread {
         return (encoder_ticks);
     }
 
+    boolean drivetrainBusy(int ticks)
+    {
+        int avg = (java.lang.Math.abs(Motor_FL.getCurrentPosition())
+                + java.lang.Math.abs(Motor_FR.getCurrentPosition())
+                + java.lang.Math.abs(Motor_BL.getCurrentPosition())
+                + java.lang.Math.abs(Motor_BR.getCurrentPosition()))/4;
+        if ((avg >= (ticks - tollerance))  || (avg <= (ticks + tollerance))){
+            return false;
+        }
+        return true;
+    }
+
     /*****************************************************************************/
     /* Section:      Move to specific distance functions                         */
     /*                                                                           */
@@ -229,9 +284,7 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Motor_BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        //Wait for them to reach to the position
-        //  while ((Motor_BR.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_FL.isBusy())){
-        while (Motor_BL.isBusy() && Motor_FR.isBusy()) {
+        while (Motor_FL.isBusy() && Motor_BL.isBusy() && Motor_FR.isBusy() && Motor_BR.isBusy()) {
             if ((System.currentTimeMillis() - startTime) > 3000){
                 break;
             }
@@ -284,10 +337,10 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setTargetPosition(ticks);
 
         //Set power of all motors
-        Motor_FL.setPower(power * 0.9);
+        Motor_FL.setPower(power);
         Motor_FR.setPower(power);
         Motor_BR.setPower(power);
-        Motor_BL.setPower(power * 1.1);
+        Motor_BL.setPower(power);
 
         //Set Motors to RUN_TO_POSITION
         Motor_FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -297,7 +350,7 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FL.isBusy() && Motor_BL.isBusy()) || (Motor_FR.isBusy() && Motor_BR.isBusy())){
-        while (Motor_FR.isBusy()&& Motor_BL.isBusy()) {
+        while (Motor_FL.isBusy() && Motor_BL.isBusy() && Motor_FR.isBusy() && Motor_BR.isBusy()) {
 
             if ((System.currentTimeMillis() - startTime) > 3000){
                 break;
@@ -350,8 +403,8 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setTargetPosition((-1) * ticks);
 
         //Set power of all motors
-        Motor_FL.setPower((0.92) * power);
-        Motor_FR.setPower((0.92) * power);
+        Motor_FL.setPower(power);
+        Motor_FR.setPower(power);
         Motor_BR.setPower(power);
         Motor_BL.setPower(power);
 
@@ -364,12 +417,16 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FR.isBusy() && Motor_BL.isBusy()) || (Motor_FL.isBusy() && Motor_BR.isBusy())){
-        while ((Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy())&&((System.currentTimeMillis() - startTime) < 1000)) {
+        while ((Motor_FL.isBusy()
+                && Motor_FR.isBusy()
+                && Motor_BL.isBusy()
+                && Motor_BR.isBusy())
+                &&((System.currentTimeMillis() - startTime) < 1000)) {
 
-          /*  if ((System.currentTimeMillis() - startTime) > 3000){
+            if ((System.currentTimeMillis() - startTime) > 1000){
                 Log.i(TAG, "moveRightToPosition : breaking out as time is more than 3 sec");
                 break;
-            }*/
+            }
 
             if (DEBUG_DEBUG) {
                 Log.i(TAG, "Actual Ticks Motor0 : " + Motor_FL.getCurrentPosition());
@@ -418,8 +475,8 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setTargetPosition(ticks);
 
         //Set power of all motors
-        Motor_FL.setPower((0.92) * power);
-        Motor_FR.setPower((0.92) * power);
+        Motor_FL.setPower(power);
+        Motor_FR.setPower(power);
         Motor_BR.setPower(power);
         Motor_BL.setPower(power);
 
@@ -432,10 +489,14 @@ public class Robot extends java.lang.Thread {
 
         //Wait for them to reach to the position
         // while ((Motor_FL.isBusy() && Motor_BR.isBusy()) || (Motor_FR.isBusy() && Motor_BL.isBusy())){
-        while ((Motor_FL.isBusy() && Motor_FR.isBusy() && Motor_BL.isBusy() && Motor_BR.isBusy())&&((System.currentTimeMillis() - startTime) < 1000)) {
+        while ((Motor_FL.isBusy()
+                && Motor_FR.isBusy()
+                && Motor_BL.isBusy()
+                && Motor_BR.isBusy())
+                &&((System.currentTimeMillis() - startTime) < 1000)) {
 
 
-            if ((System.currentTimeMillis() - startTime) > 3000){
+            if ((System.currentTimeMillis() - startTime) > 1000){
                 break;
             }
 
@@ -607,7 +668,7 @@ public class Robot extends java.lang.Thread {
         Motor_BR.setPower(orientation * power);
         Motor_BL.setPower(orientation * power);
 
-        try {
+       /* try {
             sleep(time);
         } catch (Exception e) {
             e.printStackTrace();
@@ -617,17 +678,26 @@ public class Robot extends java.lang.Thread {
         Motor_FL.setPower(0);
         Motor_FR.setPower(0);
         Motor_BR.setPower(0);
-        Motor_BL.setPower(0);
+        Motor_BL.setPower(0);*/
     }
 
-
+    public void turnOff(){
+        Motor_FL.setPower(0);
+        Motor_FR.setPower(0);
+        Motor_BR.setPower(0);
+        Motor_BL.setPower(0);
+    }
+    public void turnOffSlides(){
+        Slide_L.setPower(0);
+        Slide_R.setPower(0);
+    }
 
     public void moveF(double power, long distance) {
         Motor_FL.setPower(power);
         Motor_FR.setPower((-1) * power);
         Motor_BR.setPower((-1) * power);
         Motor_BL.setPower(power);
-        try {
+        /*try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
             e.printStackTrace();
@@ -638,7 +708,7 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setPower(0);
         telemetry.addData("Direction", "Backward");
         telemetry.update();
-        if (isTeleOp == false) pause(250);
+        if (isTeleOp == false) pause(250);*/
     }
 
     public void moveB(double power, long distance) {
@@ -646,7 +716,7 @@ public class Robot extends java.lang.Thread {
         Motor_FR.setPower(power); //FR
         Motor_BR.setPower(power); //BR
         Motor_BL.setPower((-1) * power); //BL
-        try {
+        /*try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
             e.printStackTrace();
@@ -657,16 +727,16 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setPower(0);
         telemetry.addData("Direction", "Backward");
         telemetry.update();
-        if (isTeleOp == false) pause(250);
+        if (isTeleOp == false) pause(250);*/
     }
 
     public void moveL(double power, long distance) {
 
-        Motor_FL.setPower((0.92) * power );
-        Motor_FR.setPower((0.92) * power);
+        Motor_FL.setPower((1) * power );
+        Motor_FR.setPower((1) * power);
         Motor_BR.setPower((-1) * power);
         Motor_BL.setPower((-1) *  power);
-        try {
+        /*try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
             e.printStackTrace();
@@ -677,17 +747,17 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setPower(0);
         telemetry.addData("Direction", "Right");
         telemetry.update();
-        if (isTeleOp == false) pause(250);
+        if (isTeleOp == false) pause(250);*/
     }
 
     public void moveR(double power, long distance) {
 
-        Motor_FL.setPower((-1) * (0.92) * power);
-        Motor_FR.setPower((-1) * (0.92) * power);
+        Motor_FL.setPower((-1) * (1) * power);
+        Motor_FR.setPower((-1) * (1) * power);
         Motor_BR.setPower(power );
         Motor_BL.setPower(power);
 
-        try {
+        /*try {
             sleep(distance * movementFactor);
         } catch (Exception e) {
             e.printStackTrace();
@@ -698,10 +768,10 @@ public class Robot extends java.lang.Thread {
         Motor_BL.setPower(0);
         telemetry.addData("Direction", "Left");
         telemetry.update();
-        if (isTeleOp == false) pause(250);
+        if (isTeleOp == false) pause(250);*/
     }
 
-    public void ClampDown(int time){
+    /*public void ClampDown(int time){
         Clamp_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Clamp_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Clamp_L.setPower(0.4);
@@ -727,7 +797,7 @@ public class Robot extends java.lang.Thread {
         }
         Clamp_L.setPower(0);
         Clamp_R.setPower(0);
-    }
+    }*/
 
     public void slowTurn(double angle) {
         Log.i(TAG, "Enter Function slowTurn Angle: "+ angle);
@@ -774,20 +844,23 @@ public class Robot extends java.lang.Thread {
 
     public void grabStone() {
         Log.i(TAG, "Enter Function grabStone Start Position:" + pincher.getPosition());
-        pincher.setPosition(0.8);
+        pincher.setPosition(0.4);
         Log.i(TAG, "Exit Function grabStone End Position:" + pincher.getPosition());
     }
 
     public void tolerance(){
-        int tolerance1;
-        tolerance1 = Motor_FL.getTargetPositionTolerance();
-        Log.i(TAG, "" + tolerance1);
+            int tolerance1;
+            tolerance1 = Motor_FL.getTargetPositionTolerance();
+            Log.i(TAG, "" + tolerance1);
 
     }
     public void dropStone() {
         Log.i(TAG, "Enter Function dropStone Start Position:" + pincher.getPosition());
-        pincher.setPosition(0.4);
+        pincher.setPosition(1);
         Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
+    }
+    public void dropCap(){
+        capper.setPosition(0.1);
     }
 
      public void moveWithSlide(double power, int time,int direction, double slidePower, int slideDirection) {
@@ -869,6 +942,28 @@ public class Robot extends java.lang.Thread {
         //Reached the distance, so stop the motors
         Slide_L.setPower(0);
         Slide_R.setPower(0);
+
+        Log.i(TAG, "Exit Function: moveSlides");
+    }
+    public void moveSlidesTeleOp(double power, int time, boolean teleop) {
+        Log.i(TAG, "Enter Function: moveSlides");
+        // Reset all encoders
+        long slide_R_Start = Slide_R.getCurrentPosition();
+        long slide_L_Start = Slide_L.getCurrentPosition();
+
+        Slide_L.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Slide_R.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if (teleop) {
+            Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        } else {
+            Slide_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            Slide_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        Slide_L.setPower(power);
+        Slide_R.setPower((-1) * power);
 
         Log.i(TAG, "Exit Function: moveSlides");
     }

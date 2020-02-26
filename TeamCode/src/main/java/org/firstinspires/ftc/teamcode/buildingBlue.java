@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 
 @Autonomous
-@Disabled
+
 public class buildingBlue extends LinearOpMode {
 
     public String TAG = "FTC";
@@ -42,15 +42,19 @@ public class buildingBlue extends LinearOpMode {
             4) In total, our team can score 15 points from this Loading zone program
          */
 
-
-      Robot.moveLeftForTime(0.5, 750, false);
+Robot.moveSlides(1,800,false);
+sleep(300);
+Robot.moveSlides(-1,800,false);
+sleep(100);
+Robot.moveBackwardForTime(1,500,true);
+sleep(100);
+     /* Robot.moveLeftForTime(0.5, 750, false);
       Robot.moveForwardToPosition(0.5, 32);
-      Robot.ClampDown(250);
+      //Robot.ClampDown(250);
       Robot.moveBackwardToPosition(0.6, 30);
       Robot.slowTurn(240);
-      Robot.ClampUp(250);
+      //Robot.ClampUp(250);
       //Robot.moveRightForTime(1, 500, false);
       //Robot.moveBackwardForTime(0.3, 500, false);
       //Robot.moveRightForTime(0.5, 3000, false);
-    }
-}
+    }*/}}
