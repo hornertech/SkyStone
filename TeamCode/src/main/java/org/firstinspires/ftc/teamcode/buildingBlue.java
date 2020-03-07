@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 
 @Autonomous
-
+@Disabled
 public class buildingBlue extends LinearOpMode {
 
     public String TAG = "FTC";

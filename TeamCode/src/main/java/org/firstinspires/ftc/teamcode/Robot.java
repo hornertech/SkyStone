@@ -860,8 +860,9 @@ public class Robot extends java.lang.Thread {
         Log.i(TAG, "Exit Function dropStone Start Position:" + pincher.getPosition());
     }
     public void dropCap(){
-        capper.setPosition(0.1);
+        capper.setPosition(0.4);
     }
+    public void closeCap(){ capper.setPosition(0.8); }
 
      public void moveWithSlide(double power, int time,int direction, double slidePower, int slideDirection) {
         Log.i(TAG, "Enter Function: moveWithSlide1 ");

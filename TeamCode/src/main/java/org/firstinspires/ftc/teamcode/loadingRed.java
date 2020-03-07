@@ -115,7 +115,7 @@ public class loadingRed extends LinearOpMode {
             location[6] = rotation.thirdAngle;
             Log.i(TAG, "Positions: X =" + location[1] + " Y = " + location[2] + " Z = " + location[3]);
             Log.i(TAG, "Angles: ROLL =" + location[4] + "Pitch = " + location[5] + "Heading = " + location[6]);
-            if ((location[1] > 25 || location[1] < -25) || (location[2] > 10 || location[2] < -10) || (location[6] >30 || location[6] < -30))
+            if ((location[1] > 35 || location[1] < -35) || (location[2] > 10 || location[2] < -10) || (location[6] >30 || location[6] < -30))
             {
                 location[0] = 0;
                 Log.i(TAG, "Exiting Function detectOnce: Detected wrong Element, returning no element detected");
@@ -253,11 +253,13 @@ public class loadingRed extends LinearOpMode {
         //Robot.moveForwardToPosition(1, 12);
         //Robot.moveForwardForTime(0.5, 650, false );
         // Robot.moveSlides(1,700, false);
-        Robot.moveWithSlide(0.4, 800, 1, 0.7, 1);
+        Robot.closeCap();
+        Robot.moveWithSlide(0.4, 800, 1, 1, 1);
+        Robot.moveSlides(1, 150, false);
         Robot.grabStone();
         //sleep(200);
         Robot.dropStone();
-        Robot.moveSlides(-0.7, 750, false);
+        Robot.moveSlides(-1, 950, false);
 
         // Robot.dropStone();
         //Our Detection Algorithm
@@ -283,7 +285,7 @@ public class loadingRed extends LinearOpMode {
 
                 Robot.grabStone();
                 sleep(400);
-                Robot.moveBackwardForTime(1, 150, false );
+                Robot.moveBackwardForTime(1, 120, false );
                 Robot.rotateRight(-91, 1);
 
                 if(skystonePicked == 1) {
@@ -317,7 +319,7 @@ public class loadingRed extends LinearOpMode {
                 // In the case that Skystone was not detected
             } else {
                 // Stone in front is not skystone, move to next one
-                 Robot.slowTurn(-0.5);
+                 Robot.slowTurn(-5.0);
                 //Robot.moveRightForTime(0.5, stoneStrafeTime, false);
                 Robot.moveLeftToPosition(0.5, 8);
             }
@@ -327,7 +329,7 @@ public class loadingRed extends LinearOpMode {
                 Log.i(TAG, "+++++++ Second Stone not detected, picking from: " + (secondSkyStoneLocation+1));
                 if(secondSkyStoneLocation == -1 || secondSkyStoneLocation == 4 || secondSkyStoneLocation > 5){
                     //Robot.moveLeftForTime(0.5, 420, false);
-                    Robot.moveRightToPosition(0.5, 8);
+                    Robot.moveRightToPosition(0.5, 4);
                     Robot.grabStone();
                     Robot.dropStone();
                     sleep(500);
@@ -338,12 +340,12 @@ public class loadingRed extends LinearOpMode {
                         moveToSkyStone(Robot);
                     }
                     else {
-                        Robot.moveForwardToPosition(0.5, 11);
+                        Robot.moveForwardToPosition(0.5, 9);
                     }
 
                     Robot.grabStone();
                     sleep(200);
-                    Robot.moveBackwardForTime(0.5, 300, false);
+                    Robot.moveBackwardForTime(1, 300, false);
                     Robot.rotateRight(-90, 1);
                     Robot.moveForwardToPosition(1, 72);
                     Robot.dropStone();
@@ -352,7 +354,7 @@ public class loadingRed extends LinearOpMode {
                 }
                 else if(secondSkyStoneLocation == 3){
                     //Robot.moveLeftForTime(0.5, 840, false);
-                    Robot.moveRightToPosition(0.7, 16);
+                    Robot.moveRightToPosition(0.7, 12);
                     Robot.grabStone();
                     Robot.dropStone();
                     sleep(500);
@@ -363,13 +365,12 @@ public class loadingRed extends LinearOpMode {
                         moveToSkyStone(Robot);
                     }
                     else {
-                        Robot.moveForwardToPosition(0.5, 11);
-                        Robot.moveForwardToPosition(0.5, 11);
+                        Robot.moveForwardToPosition(0.5, 9);
                     }
 
                     Robot.grabStone();
                     sleep(200);
-                    Robot.moveBackwardForTime(0.5, 280, false);
+                    Robot.moveBackwardForTime(1, 300, false);
                     Robot.rotateRight(-90, 1);
                     Robot.moveForwardToPosition(1, 64);
                     Robot.dropStone();
@@ -392,10 +393,10 @@ public class loadingRed extends LinearOpMode {
                     Robot.slowTurn(25);
                     Robot.grabStone();
                     sleep(200);
-                    Robot.moveBackwardForTime(5, 400, false);
-                    Robot.slowTurn(-128);
+                    Robot.moveBackwardForTime(0.5, 400, false);
+                    Robot.slowTurn(-140);
                     sleep(400);
-                    Robot.fixOrientation(-88.5);
+                    Robot.fixOrientation(-93);
                     Robot.moveForwardToPosition(1, 72);
                     Robot.dropStone();
                     sleep(200);

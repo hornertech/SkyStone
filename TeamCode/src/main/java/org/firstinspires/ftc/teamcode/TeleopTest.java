@@ -144,7 +144,7 @@ public class TeleopTest extends LinearOpMode{
                 robot.moveSlides(0,0, false);
             }
             if(this.gamepad2.a == true){
-                robot.tolerance();
+                robot.closeCap();
             }
             if(this.gamepad2.right_trigger == 1 && this.gamepad2.left_trigger == 1){
                 robot.dropCap();

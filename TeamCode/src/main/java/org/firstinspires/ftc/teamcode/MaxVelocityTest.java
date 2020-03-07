@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
+@Disabled
 public class MaxVelocityTest extends LinearOpMode {
 
     DcMotorEx motor;
