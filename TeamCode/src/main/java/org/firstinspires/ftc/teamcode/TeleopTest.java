@@ -36,15 +36,21 @@ public class TeleopTest extends LinearOpMode{
 
             /********** GamePad 1 ****************/
             //Turning
+            if(this.gamepad1.left_stick_x < 0.5 && this.gamepad1.left_stick_x > -0.5){
+                robot.turnOff();
+            }
             if (this.gamepad1.left_stick_x > 0.5) {
-                robot.turnForTime(0.6, 10, false, -1 );
+                robot.turnForTime(0.8, 10, false, 1 );
             }
 
             if (this.gamepad1.left_stick_x < -0.5) {
-                robot.turnForTime(0.6, 10, false, 1 );
+                robot.turnForTime(0.8, 10, false, -1 );
             }
 
             // Moving
+            if(this.gamepad1.right_stick_x < 0.5 && this.gamepad1.right_stick_x > -0.5 && this.gamepad1.right_stick_y < 0.5 && this.gamepad1.right_stick_y > -0.5){
+                robot.turnOff();
+            }
             if (this.gamepad1.right_stick_y > 0.5) {
                 robot.moveB(1, 10);
             }
@@ -59,6 +65,10 @@ public class TeleopTest extends LinearOpMode{
 
             if (this.gamepad1.right_stick_x < -0.5) {
                 robot.moveR(1, 10);
+            }
+
+            if(this.gamepad1.dpad_left == false &&this.gamepad1.dpad_right == false && this.gamepad1.dpad_up == false && this.gamepad1.dpad_down == false){
+                robot.turnOff();
             }
 
             if(this.gamepad1.dpad_left == true) {
@@ -83,12 +93,14 @@ public class TeleopTest extends LinearOpMode{
                 telemetry.addData("Robot-Testing ", "grabStone");
                 telemetry.update();
                 robot.grabStone();
+                //robot.moveForwardToPosition(0.5, 12);
             }
 
             if (this.gamepad2.b == true) {
                 telemetry.addData("Robot-Testing ", "dropStone");
                 telemetry.update();
                 robot.dropStone();
+                //robot.moveBackwardToPosition(0.5, 12);
             }
 
             // Slide
@@ -104,7 +116,7 @@ public class TeleopTest extends LinearOpMode{
                 robot.moveSlides(-0.5, 10, true);
             }
 
-            if (this.gamepad1.b == true){
+            /*if (this.gamepad1.b == true){
                 telemetry.addData("Clamp", "Up");
                 telemetry.update();
                 robot.ClampUp(25);
@@ -114,13 +126,28 @@ public class TeleopTest extends LinearOpMode{
                 telemetry.addData("Clamp", "Down");
                 telemetry.update();
                 robot.ClampDown(25);
+            }*/
+
+            if(this.gamepad2.right_stick_x < 0.5 && this.gamepad2.right_stick_x > -0.5){
+                robot.turnOffSlides();
             }
+
             if (this.gamepad2.right_stick_y > 0.5) {
-                robot.moveSlides(-1, 10, true);
+                robot.moveSlidesTeleOp(-1, 10, true);
             }
 
             if (this.gamepad2.right_stick_y < -0.5) {
-                robot.moveSlides(1, 10, true);
+                robot.moveSlidesTeleOp(1, 10, true);
+            }
+
+            if(this.gamepad2.right_trigger == 1){
+                robot.moveSlides(0,0, false);
+            }
+            if(this.gamepad2.a == true){
+                robot.closeCap();
+            }
+            if(this.gamepad2.right_trigger == 1 && this.gamepad2.left_trigger == 1){
+                robot.dropCap();
             }
 
         };

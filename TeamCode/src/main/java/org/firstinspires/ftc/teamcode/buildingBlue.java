@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 
 @Autonomous
+@Disabled
 public class buildingBlue extends LinearOpMode {
 
     public String TAG = "FTC";
@@ -40,38 +42,19 @@ public class buildingBlue extends LinearOpMode {
             4) In total, our team can score 15 points from this Loading zone program
          */
 
-
-        Robot.moveBackwardForTime(0.5, 385, false);
-        Robot.moveLeftForTime(0.6, 2100, false);
-       // sleep(500);
-        //Robot.fixOrientation(-1);
-       // Robot.moveLeftForTime(0.6, 1600, false);
-        // Get right up next to the Foundation
-        Robot.ClampDown(200);
-        sleep(1000);
-        Robot.moveRightForTime(1, 1000, false);
-        //sleep(300);
-        //Robot.fixOrientation(10);
-        Robot.slowTurn(-50);
-        Robot.moveRightForTime(1, 1000, false);
-        Robot.slowTurn(-50);
-        Robot.moveRightForTime(1, 1000, false);
-        Robot.slowTurn(-50);
-        Robot.moveRightForTime(1, 1100, false);
-        // Pull foundation in to the side wall
-        Robot.ClampUp(120);
-        Robot.moveRightForTime(0.3, 3000, false);
-        // Align with side wall
-        Robot.moveBackwardForTime(0.3, 2000, false);
-        Robot.moveForwardForTime(0.7, 2000, false);
-        Robot.moveLeftForTime(1, 800, false);
-        // Get in front of Foundation
-        Robot.moveBackwardForTime(0.3, 1900, false);
-        Robot.moveForwardForTime(0.2, 150, false);
-        Robot.moveRightForTime(0.5, 1200, false);
-        Robot.moveLeftForTime(0.5, 50, false);
-        Robot.moveForwardForTime(1, 700, false);
-        // Park
-        Robot.moveRightForTime(0.25, 2000, false);
-    }
-}
+Robot.moveSlides(1,800,false);
+sleep(300);
+Robot.moveSlides(-1,800,false);
+sleep(100);
+Robot.moveBackwardForTime(1,500,true);
+sleep(100);
+     /* Robot.moveLeftForTime(0.5, 750, false);
+      Robot.moveForwardToPosition(0.5, 32);
+      //Robot.ClampDown(250);
+      Robot.moveBackwardToPosition(0.6, 30);
+      Robot.slowTurn(240);
+      //Robot.ClampUp(250);
+      //Robot.moveRightForTime(1, 500, false);
+      //Robot.moveBackwardForTime(0.3, 500, false);
+      //Robot.moveRightForTime(0.5, 3000, false);
+    }*/}}
